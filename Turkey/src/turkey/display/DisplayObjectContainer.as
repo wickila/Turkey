@@ -2,19 +2,38 @@ package turkey.display
 {
 	import com.adobe.utils.PerspectiveMatrix3D;
 	
+	import flash.geom.Matrix;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
+	
 	import turkey.core.turkey_internal;
 	import turkey.events.TurkeyEvent;
+	import turkey.utils.MatrixUtil;
 	
 	use namespace turkey_internal
 	public class DisplayObjectContainer extends DisplayObject
 	{
 		private var _children:Vector.<DisplayObject>;
+		private var _mouseChildren:Boolean = true;
+		
+		private static var sHelperMatrix:Matrix = new Matrix();
+		private static var sHelperPoint:Point = new Point();
 		private static var _broadcastListeners:Vector.<DisplayObject> = new <DisplayObject>[];
 		public function DisplayObjectContainer()
 		{
 			_children = new Vector.<DisplayObject>();
 		}
 		
+		public function get mouseChildren():Boolean
+		{
+			return _mouseChildren;
+		}
+
+		public function set mouseChildren(value:Boolean):void
+		{
+			_mouseChildren = value;
+		}
+
 		public function addChild(child:DisplayObject):DisplayObject
 		{
 			addChildAt(child, numChildren);
@@ -143,5 +162,66 @@ package turkey.display
 		}
 		
 		public function get numChildren():int { return _children.length; }
+		
+		public override function getBounds(targetSpace:DisplayObject, resultRect:Rectangle=null):Rectangle
+		{
+			if (resultRect == null) resultRect = new Rectangle();
+			
+			var numChildren:int = _children.length;
+			
+			if (numChildren == 0)
+			{
+				getTransformationMatrix(targetSpace, sHelperMatrix);
+				MatrixUtil.transformCoords(sHelperMatrix, 0.0, 0.0, sHelperPoint);
+				resultRect.setTo(sHelperPoint.x, sHelperPoint.y, 0, 0);
+				return resultRect;
+			}
+			else if (numChildren == 1)
+			{
+				return _children[0].getBounds(targetSpace, resultRect);
+			}
+			else
+			{
+				var minX:Number = Number.MAX_VALUE, maxX:Number = -Number.MAX_VALUE;
+				var minY:Number = Number.MAX_VALUE, maxY:Number = -Number.MAX_VALUE;
+				
+				for (var i:int=0; i<numChildren; ++i)
+				{
+					_children[i].getBounds(targetSpace, resultRect);
+					minX = minX < resultRect.x ? minX : resultRect.x;
+					maxX = maxX > resultRect.right ? maxX : resultRect.right;
+					minY = minY < resultRect.y ? minY : resultRect.y;
+					maxY = maxY > resultRect.bottom ? maxY : resultRect.bottom;
+				}
+				
+				resultRect.setTo(minX, minY, maxX - minX, maxY - minY);
+				return resultRect;
+			}                
+		}
+		
+		/** @inheritDoc */
+		public override function hitTest(localPoint:Point,forMouse:Boolean = false):DisplayObject
+		{
+			if (forMouse && (!visible||!mouseEnabled))
+				return null;
+			if(!forMouse || mouseChildren)
+			{
+				var localX:Number = localPoint.x;
+				var localY:Number = localPoint.y;
+				
+				var numChildren:int = _children.length;
+				for (var i:int=numChildren-1; i>=0; --i) // front to back!
+				{
+					var child:DisplayObject = _children[i];
+					getTransformationMatrix(child, sHelperMatrix);
+					
+					MatrixUtil.transformCoords(sHelperMatrix, localX, localY, sHelperPoint);
+					var target:DisplayObject = child.hitTest(sHelperPoint);
+					
+					if (target) return target;
+				}
+			}
+			return null;
+		}
 	}
 }

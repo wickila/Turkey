@@ -5,12 +5,15 @@ package turkey.display
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.system.Capabilities;
+	import flash.ui.Mouse;
+	import flash.ui.MouseCursor;
 	import flash.utils.getQualifiedClassName;
 	
 	import turkey.enumrate.BlendMode;
 	import turkey.errors.AbstractClassError;
 	import turkey.errors.AbstractMethodError;
 	import turkey.events.EventDispatcher;
+	import turkey.events.TurkeyMouseEvent;
 	import turkey.utils.MatrixUtil;
 	import turkey.utils.VertexData;
 	
@@ -27,18 +30,24 @@ package turkey.display
 		protected var _scaleY:Number = 1;
 		protected var _pivotX:Number = 0;
 		protected var _pivotY:Number = 0;
+		private var _localMousePoint:Point = new Point();
+		private var _stageMousePoint:Point = new Point();
 		
 		protected var _mouseEnabled:Boolean=true;
+		protected var _buttonMode:Boolean = false;
 		protected var _alpha:Number=1;
 		protected var _visible:Boolean = true;
 		protected var _blendMode:String = BlendMode.NORMAL;
 		protected var _parent:DisplayObjectContainer;
 		protected var _filters:Array;
 		protected var _transformationMatrix:Matrix;
+		protected var _pixelHit:Boolean=false;
+		private var _mouseOut:Boolean = true;
 		
 		protected var _vertexData:VertexData;
 		private static var sAncestors:Vector.<DisplayObject> = new <DisplayObject>[];
-		private var sHelperMatrix:Matrix;
+		private var sHelperMatrix:Matrix = new Matrix();
+		private var sHelperRectangle:Rectangle = new Rectangle();
 		private var _matrixChanged:Boolean;
 		
 		public function DisplayObject()
@@ -49,6 +58,50 @@ package turkey.display
 				throw new AbstractClassError();
 			}
 			_transformationMatrix = new Matrix();
+		}
+
+		public function get pixelHit():Boolean
+		{
+			return _pixelHit;
+		}
+
+		public function set pixelHit(value:Boolean):void
+		{
+			_pixelHit = value;
+		}
+
+		public function get buttonMode():Boolean
+		{
+			return _buttonMode;
+		}
+
+		public function set buttonMode(value:Boolean):void
+		{
+			if(_buttonMode == value)return;
+			_buttonMode = value;
+			Mouse.cursor = (_mouseEnabled && _buttonMode && !_mouseOut) ? MouseCursor.BUTTON : MouseCursor.AUTO;
+		}
+
+		internal function get mouseOut():Boolean
+		{
+			return _mouseOut;
+		}
+
+		internal function set mouseOut(value:Boolean):void
+		{
+			if(_mouseOut == value)return;
+			_mouseOut = value;
+			if(_mouseEnabled)
+			{
+				if(_mouseOut)
+				{
+					dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_OUT,this,mouseX,mouseY,_stageMousePoint.x,_stageMousePoint.y));
+				}else
+				{
+					dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_OVER,this,mouseX,mouseY,_stageMousePoint.x,_stageMousePoint.y));
+				}
+			}
+			Mouse.cursor = (_mouseEnabled && _buttonMode && !_mouseOut) ? MouseCursor.BUTTON : MouseCursor.AUTO;
 		}
 
 		public function get x():Number
@@ -176,9 +229,11 @@ package turkey.display
 
 		public function set mouseEnabled(value:Boolean):void
 		{
+			if(_mouseEnabled == value)return;
 			_mouseEnabled = value;
+			Mouse.cursor = (_mouseEnabled && _buttonMode && !_mouseOut) ? MouseCursor.BUTTON : MouseCursor.AUTO;
 		}
-
+		
 		public function get alpha():Number
 		{
 			return _alpha;
@@ -252,9 +307,19 @@ package turkey.display
 			_filters = value;
 		}
 		
-		public function hitTest(localPoint:Point):DisplayObject
+		public function get mouseX():Number
 		{
-			return null;
+			return _localMousePoint.x;
+		}
+		
+		public function get mouseY():Number
+		{
+			return _localMousePoint.y;
+		}
+		
+		public function hitTest(localPoint:Point,forMouse:Boolean = false):DisplayObject
+		{
+			return getBounds(this,sHelperRectangle).contains(localPoint.x,localPoint.y)?this:null;
 		}
 		
 		public function get texture():TextureBase
@@ -456,6 +521,19 @@ package turkey.display
 		public function get hasVisibleArea():Boolean
 		{
 			return _alpha != 0.0 && _visible && _scaleX != 0.0 && _scaleY != 0.0;
+		}
+		
+		public function hitMouse(stageX:Number,stageY:Number):void
+		{
+			_stageMousePoint.setTo(stageX,stageY);
+			globalToLocal(_stageMousePoint,_localMousePoint);
+			if(mouseEnabled && hitTest(_localMousePoint,true))
+			{
+				mouseOut = false;
+			}else
+			{
+				mouseOut = true;
+			}
 		}
 	}
 }

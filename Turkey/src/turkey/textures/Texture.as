@@ -84,19 +84,20 @@ package turkey.textures
     {
         private var mFrame:Rectangle;
         private var mRepeat:Boolean;
+		private var _bitmapData:BitmapData;
         
         /** helper object */
         private static var sOrigin:Point = new Point();
         
         /** @private */
-        public function Texture()
+        public function Texture(bitmapData:BitmapData)
         {
             if (Capabilities.isDebugger && 
                 getQualifiedClassName(this) == "starling.textures::Texture")
             {
                 throw new AbstractClassError();
             }
-            
+            _bitmapData = bitmapData;
             mRepeat = false;
         }
         
@@ -105,6 +106,11 @@ package turkey.textures
         { 
             // override in subclasses
         }
+		
+		public function get bitmapData():BitmapData
+		{
+			return _bitmapData;
+		}
         
         /** Creates a texture object from a bitmap.
          *  Beware: you must not dispose 'data' if Starling should handle a lost device context. */
@@ -142,40 +148,15 @@ package turkey.textures
             
             uploadBitmapData(nativeTexture, data, generateMipMaps);
             
-            var concreteTexture:ConcreteTexture = new ConcreteTexture(
+            var concreteTexture:ConcreteTexture = new ConcreteTexture(data,
                 nativeTexture, Context3DTextureFormat.BGRA, legalWidth, legalHeight,
                 generateMipMaps, true, optimizeForRenderTexture, scale);
-            
-            if (potData)
-                potData.dispose();
-            
             if (origWidth == legalWidth && origHeight == legalHeight)
                 return concreteTexture;
             else
                 return new SubTexture(concreteTexture, 
                                       new Rectangle(0, 0, origWidth/scale, origHeight/scale), 
                                       true);
-        }
-        
-        /** Creates a texture from the compressed ATF format. If you don't want to use any embedded
-         *  mipmaps, you can disable them by setting "useMipMaps" to <code>false</code>.
-         *  Beware: you must not dispose 'data' if Starling should handle a lost device context. */ 
-        public static function fromAtfData(data:ByteArray, scale:Number=1, 
-                                           useMipMaps:Boolean=true):Texture
-        {
-            var context:Context3D = Stage.context3D;
-            if (context == null) throw new MissingContextError();
-            
-            var atfData:AtfData = new AtfData(data);
-            var nativeTexture:flash.display3D.textures.Texture = context.createTexture(
-                    atfData.width, atfData.height, atfData.format, false);
-            
-            uploadAtfData(nativeTexture, data);
-            
-            var concreteTexture:ConcreteTexture = new ConcreteTexture(nativeTexture, atfData.format, 
-                atfData.width, atfData.height, useMipMaps && atfData.numTextures > 1, 
-                false, false, scale);
-            return concreteTexture;
         }
         
         /** Creates an empty texture of a certain size and color. The color parameter
@@ -187,34 +168,6 @@ package turkey.textures
             var bitmapData:BitmapData = new BitmapData(width*scale, height*scale, true, color);
             var texture:Texture = fromBitmapData(bitmapData, false, optimizeForRenderTexture, scale);
             return texture;
-        }
-        
-        /** Creates an empty texture of a certain size. Useful mainly for render textures. 
-         *  Beware that the texture can only be used after you either upload some color data or
-         *  clear the texture while it is an active render target. */
-        public static function empty(width:int=64, height:int=64, premultipliedAlpha:Boolean=false,
-                                     optimizeForRenderTexture:Boolean=true,
-                                     scale:Number=-1):Texture
-        {
-            var origWidth:int  = width * scale;
-            var origHeight:int = height * scale;
-            var legalWidth:int  = TurkeyUtils.getNextPowerOfTwo(origWidth);
-            var legalHeight:int = TurkeyUtils.getNextPowerOfTwo(origHeight);
-            var format:String = Context3DTextureFormat.BGRA;
-            var context:Context3D = Stage.context3D;
-            
-            if (context == null) throw new MissingContextError();
-            
-            var nativeTexture:flash.display3D.textures.Texture = context.createTexture(
-                legalWidth, legalHeight, Context3DTextureFormat.BGRA, optimizeForRenderTexture);
-            
-            var concreteTexture:ConcreteTexture = new ConcreteTexture(nativeTexture, format,
-                legalWidth, legalHeight, false, premultipliedAlpha, optimizeForRenderTexture, scale);
-            
-            if (origWidth == legalWidth && origHeight == legalHeight)
-                return concreteTexture;
-            else
-                return new SubTexture(concreteTexture, new Rectangle(0, 0, width, height), true);
         }
         
         /** Creates a texture that contains a region (in pixels) of another texture. The new

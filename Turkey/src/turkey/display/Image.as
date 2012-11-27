@@ -1,6 +1,8 @@
 package turkey.display
 {
+	import flash.display.BitmapData;
 	import flash.display3D.textures.TextureBase;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
 	import turkey.textures.Texture;
@@ -8,6 +10,7 @@ package turkey.display
 	public class Image extends Quad
 	{
 		private var _texture:Texture;
+		private var _bitmapdata:BitmapData;
 		public function Image(texture:Texture)
 		{
 			if (texture)
@@ -22,11 +25,19 @@ package turkey.display
 				_vertexData.setTexCoords(1, 1.0, 0.0);
 				_vertexData.setTexCoords(2, 0.0, 1.0);
 				_vertexData.setTexCoords(3, 1.0, 1.0);
+				_bitmapdata = _texture.bitmapData;
 			}
 			else
 			{
 				throw new ArgumentError("Texture cannot be null");
 			}
+		}
+		
+		override public function hitTest(localPoint:Point, forMouse:Boolean=false):DisplayObject
+		{
+			if (forMouse && (!visible||!mouseEnabled))return null;
+			if(!_pixelHit)return super.hitTest(localPoint,forMouse);
+			return _bitmapdata.getPixel32(localPoint.x,localPoint.y)&0xff000000!=0?this:null;
 		}
 		
 		override public function get width():Number

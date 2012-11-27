@@ -33,11 +33,12 @@ package turkey.textures
         
         /** Creates a ConcreteTexture object from a TextureBase, storing information about size,
          *  mip-mapping, and if the channels contain premultiplied alpha values. */
-        public function ConcreteTexture(base:TextureBase, format:String, width:int, height:int, 
+        public function ConcreteTexture(bitmapData:BitmapData,base:TextureBase, format:String, width:int, height:int, 
                                         mipMapping:Boolean, premultipliedAlpha:Boolean,
                                         optimizedForRenderTexture:Boolean=false,
                                         scale:Number=1)
         {
+			super(bitmapData);
             mScale = scale <= 0 ? 1.0 : scale;
             mBase = base;
             mFormat = format;
