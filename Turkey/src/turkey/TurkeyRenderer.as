@@ -88,7 +88,6 @@ package turkey
 				_vertexData.setAlpha(i*4+3,_alhpas[i]);
 				_indices.push(i*4,i*4+1,i*4+2,i*4+1,i*4+3,i*4+2);
 			}
-			trace(_vertexData);
 			_vertexbuffer = Stage.context3D.createVertexBuffer(_renderNum * 4,VertexData.ELEMENTS_PER_VERTEX);
 			_indexBuffer = Stage.context3D.createIndexBuffer(_indices.length);
 			

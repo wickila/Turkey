@@ -14,7 +14,7 @@ package
 	import turkey.events.TurkeyMouseEvent;
 	import turkey.textures.Texture;
 	
-	[SWF(width="800",height="600")]
+	[SWF(width="1000",height="600")]
 	public class TurkeyTest extends flash.display.Sprite
 	{
 		private var _stage2d:Stage;
@@ -31,30 +31,30 @@ package
 		{
 			_loader = new Loader();
 			_loader.contentLoaderInfo.addEventListener(flash.events.Event.COMPLETE,onTextureComplete);
-			_loader.load(new URLRequest("effect.png"));
+			_loader.load(new URLRequest("image.png"));
 		}
 		
 		protected function onTextureComplete(event:Event):void
 		{
 			var sp:turkey.display.Sprite = new turkey.display.Sprite();
 			_img = new Image(Texture.fromBitmapData(Bitmap(_loader.content).bitmapData));
-			_img.mouseEnabled = false;
-//			_img.scaleX = _img.scaleY = 3;
 //			_img.rotation = 30*Math.PI/180;
 //			_img.x = 200;
 //			_img.alpha = .5;
-//			_img.alpha = .2;
 			sp.x = 200;
-//			sp.mouseChildren = false;
-//			sp.addChild(_img);
-			sp.buttonMode = true;
+			sp.addChild(_img);
+			_img.buttonMode = true;
+			_img.pixelHit = true;
+			_img.mouseEnabled = true;
+			sp.mouseEnabled = false;
+			sp.mouseChildren = true;
+//			sp.addEventListener(TurkeyMouseEvent.CLICK,onClick);
 			_img.addEventListener(TurkeyMouseEvent.CLICK,onClick);
-			sp.addEventListener(TurkeyMouseEvent.CLICK,onClick);
-			sp.addEventListener(TurkeyMouseEvent.MOUSE_OUT,onMouseOut);
+			
 			sp.y = 200;
 //			sp.alpha = .1;
 //			sp.rotation = 30*Math.PI/180;
-			_stage2d.addChild(_img);
+			_stage2d.addChild(sp);
 //			_img = new Image(Texture.fromBitmapData(Bitmap(_loader.content).bitmapData));
 //			_img.x = 100;
 //			_img.y = 100;
@@ -69,11 +69,8 @@ package
 			
 			function onClick(event:TurkeyMouseEvent):void
 			{
-				trace(event.target,event.localX,event.localY,event.stageX,event.stageY);
-			}
-			function onMouseOut(event:TurkeyMouseEvent):void
-			{
-				trace(event.target,event.localX,event.localY,event.stageX,event.stageY);
+				trace(event.target);
+				trace(event.currentTarget);
 			}
 		}
 	}

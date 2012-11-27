@@ -106,72 +106,22 @@ package turkey.display
 		{
 			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
 		}
-		private var bubbleChain:Vector.<DisplayObject> = new Vector.<DisplayObject>();
+		
 		private function onStageClick(event:MouseEvent):void
 		{
-			var t:uint = getTimer();
-			bubbleChain = new Vector.<DisplayObject>();
 			var p:Point = new Point(event.stageX,event.stageY);
-			addBubbleChain(TurkeyMouseEvent.CLICK,this,event.stageX,event.stageY);
 			var target:DisplayObject = hitTest(p,true);
 			var child:DisplayObject = target;
-			while(child)
-			{
-				child.globalToLocal(new Point(event.stageX,event.stageY),p);
-				child.dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.CLICK,target,p.x,p.y,event.stageX,event.stageY));
-				child = child.parent;
-			}
-//			trace("dispatch click event cost ",getTimer()-t,"毫秒");
-		}
-		
-		/**
-		 *	查找target里面需要响应鼠标事件的显示对象，加入队列，准备发送事件 
-		 * @param target
-		 * @param mx
-		 * @param my
-		 * 
-		 */		
-		private function addBubbleChain(eventType:String,target:DisplayObject,mx:Number,my:Number):void
-		{
-			if(target is DisplayObjectContainer)
-			{
-				if(target.mouseEnabled&&target.hasEventListener(eventType))bubbleChain.push(target);
-				var con:DisplayObjectContainer = DisplayObjectContainer(target);
-				if(con.mouseChildren)
-				{
-					for(var i:int = DisplayObjectContainer(target).numChildren-1;i>-1;i--)
-					{
-						if(con.getChildAt(i).getBounds(this).contains(mx,my))
-						{
-							addBubbleChain(eventType,con.getChildAt(i),mx,my);
-							break;//查找到了本容器内的响应对象，就停止本次查找（因为一个容器内只能有一个现实对象响应鼠标事件)
-						}
-					}
-				}
-			}else
-			{
-				if(target.mouseEnabled && target.hasEventListener(eventType))
-				{
-					bubbleChain.push(target);
-				}
-			}
+			child.globalToLocal(new Point(event.stageX,event.stageY),p);
+			child.dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.CLICK,target,p.x,p.y,event.stageX,event.stageY));
 		}
 		
 		private function onMouseMove(event:MouseEvent):void
 		{
-			var t:uint = getTimer();
-			bubbleChain = new Vector.<DisplayObject>();
-			var p:Point = new Point();
-			addBubbleChain(TurkeyMouseEvent.MOUSE_MOVE,this,event.stageX,event.stageY);
-			var target:DisplayObject;
-			if(bubbleChain.length>0)target = bubbleChain[bubbleChain.length-1];
-			while(bubbleChain.length>0)
-			{
-				var child:DisplayObject = bubbleChain.shift();
-				child.globalToLocal(new Point(event.stageX,event.stageY),p);
-				child.dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_MOVE,target,p.x,p.y,event.stageX,event.stageY));
-			}
-//			trace("dispatch click event cost ",getTimer()-t,"毫秒");
+			var p:Point = new Point(event.stageX,event.stageY);
+			var target:DisplayObject = hitTest(p,true);
+			target.globalToLocal(new Point(event.stageX,event.stageY),p);
+			target.dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_MOVE,target,p.x,p.y,event.stageX,event.stageY));
 		}
 
         override public function hitTest(localPoint:Point,forMouse:Boolean=false):DisplayObject
@@ -185,7 +135,7 @@ package turkey.display
                 return null;
             
             // if nothing else is hit, the stage returns itself as target
-            var target:DisplayObject = super.hitTest(localPoint);
+            var target:DisplayObject = super.hitTest(localPoint,forMouse);
             if (target == null) target = this;
             return target;
         }

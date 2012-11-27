@@ -15,7 +15,7 @@ package turkey.events
 		public var stageY:Number;
 		public function TurkeyMouseEvent(type:String, target:DisplayObject, localX:Number, localY:Number, stageX:Number, stageY:Number)
 		{
-			super(type);
+			super(type,true);
 			setTarget(target);
 			this.localX = localX;
 			this.localY = localY;

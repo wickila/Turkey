@@ -202,26 +202,53 @@ package turkey.display
 		/** @inheritDoc */
 		public override function hitTest(localPoint:Point,forMouse:Boolean = false):DisplayObject
 		{
-			if (forMouse && (!visible||!mouseEnabled))
+			if (forMouse && (!visible||(!mouseEnabled&&!mouseChildren)))
 				return null;
-			if(!forMouse || mouseChildren)
+			var localX:Number = localPoint.x;
+			var localY:Number = localPoint.y;
+			var numChildren:int = _children.length;
+			if(!forMouse)
 			{
-				var localX:Number = localPoint.x;
-				var localY:Number = localPoint.y;
-				
-				var numChildren:int = _children.length;
 				for (var i:int=numChildren-1; i>=0; --i) // front to back!
 				{
 					var child:DisplayObject = _children[i];
 					getTransformationMatrix(child, sHelperMatrix);
 					
 					MatrixUtil.transformCoords(sHelperMatrix, localX, localY, sHelperPoint);
-					var target:DisplayObject = child.hitTest(sHelperPoint);
+					var target:DisplayObject = child.hitTest(sHelperPoint,forMouse);
 					
 					if (target) return target;
 				}
+			}else
+			{
+				if(mouseChildren)
+				{
+					for (var j:int=numChildren-1; j>=0; --j) // front to back!
+					{
+						var child1:DisplayObject = _children[i];
+						getTransformationMatrix(child1, sHelperMatrix);
+						
+						MatrixUtil.transformCoords(sHelperMatrix, localX, localY, sHelperPoint);
+						var target1:DisplayObject = child1.hitTest(sHelperPoint,forMouse);
+						
+						if (target1) return target1;
+					}
+				}
+				if(target1==null && mouseEnabled && getBounds(this).contains(localPoint.x,localPoint.y))
+				{
+					return this;
+				}
 			}
 			return null;
+		}
+		
+		override public function hitMouse(stageX:Number,stageY:Number):void
+		{
+			super.hitMouse(stageX,stageY);
+			for(var i:int=0;i<_children.length;i++)
+			{
+				_children[i].hitMouse(stageX,stageY);
+			}
 		}
 	}
 }

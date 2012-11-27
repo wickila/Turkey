@@ -6,6 +6,7 @@ package turkey.display
 	import flash.geom.Rectangle;
 	
 	import turkey.textures.Texture;
+	import turkey.utils.TurkeyUtils;
 
 	public class Image extends Quad
 	{
@@ -21,10 +22,12 @@ package turkey.display
 				var height:Number = frame ? frame.height : texture.height;
 				var pma:Boolean = texture.premultipliedAlpha;
 				super(width, height, 0x00000000, pma);
+				var u:Number = width/TurkeyUtils.getNextPowerOfTwo(width);
+				var v:Number = height/TurkeyUtils.getNextPowerOfTwo(height);
 				_vertexData.setTexCoords(0, 0.0, 0.0);
-				_vertexData.setTexCoords(1, 1.0, 0.0);
-				_vertexData.setTexCoords(2, 0.0, 1.0);
-				_vertexData.setTexCoords(3, 1.0, 1.0);
+				_vertexData.setTexCoords(1, u, 0.0);
+				_vertexData.setTexCoords(2, 0.0, v);
+				_vertexData.setTexCoords(3, u, v);
 				_bitmapdata = _texture.bitmapData;
 			}
 			else
@@ -37,7 +40,7 @@ package turkey.display
 		{
 			if (forMouse && (!visible||!mouseEnabled))return null;
 			if(!_pixelHit)return super.hitTest(localPoint,forMouse);
-			return _bitmapdata.getPixel32(localPoint.x,localPoint.y)&0xff000000!=0?this:null;
+			return (_bitmapdata.getPixel32(localPoint.x,localPoint.y)&0xff000000)!=0?this:null;
 		}
 		
 		override public function get width():Number
