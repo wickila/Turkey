@@ -34,10 +34,10 @@ package turkey.display
 		private var _timer:Timer;
 		private var _time:uint;
 		private var _frameRate:int;
-		private var _bColorA:uint;
-		private var _bColorR:uint;
-		private var _bColorG:uint;
-		private var _bColorB:uint;
+		private static var _bColorA:uint;
+		private static var _bColorR:uint;
+		private static var _bColorG:uint;
+		private static var _bColorB:uint;
         
         public function Stage(stage:flash.display.Stage, color:uint=0, frameRate:int=60)
         {
@@ -91,9 +91,12 @@ package turkey.display
 		
 		private function render():void
 		{
-			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
 			TurkeyRenderer.render(this,trasformMatix,1);
-			context3D.present();
+		}
+		
+		public static function clear():void
+		{
+			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
 		}
 
         override public function hitTest(localPoint:Point):DisplayObject

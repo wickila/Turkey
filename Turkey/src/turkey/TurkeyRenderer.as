@@ -45,10 +45,17 @@ package turkey
 		 */		
 		public static function render(child:DisplayObject,parentMatrix:Matrix,parentAlpha:Number=1):void
 		{
+			Stage.clear();
 			reset();
 			addChildForRender(child,parentMatrix,parentAlpha);
 			if(_renderNum<1)return;
 			rebuildBuffer();
+			drawTriangles();
+			Stage.context3D.present();
+		}
+		
+		private static function drawTriangles():void
+		{
 			for(_renderIndex=0;_renderIndex<_renderNum;_renderIndex++)
 			{
 				Stage.context3D.setTextureAt(0, _displayObjects[_renderIndex].texture);
@@ -61,6 +68,7 @@ package turkey
 				Stage.context3D.drawTriangles(_indexBuffer,_renderIndex*6,2);
 			}
 		}
+		
 		/**
 		 *	根据渲染对象池来更新渲染数据 
 		 * 
