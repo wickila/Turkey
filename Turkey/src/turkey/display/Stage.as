@@ -3,6 +3,7 @@ package turkey.display
     import flash.display.Stage;
     import flash.display.Stage3D;
     import flash.display3D.Context3D;
+    import flash.display3D.Context3DCompareMode;
     import flash.errors.IllegalOperationError;
     import flash.events.TimerEvent;
     import flash.geom.Matrix;
@@ -69,6 +70,7 @@ package turkey.display
 		{
 			context3D = stage3D.context3D;
 			context3D.enableErrorChecking = Capabilities.isDebugger;
+			context3D.setDepthTest(true,Context3DCompareMode.LESS_EQUAL);
 			context3D.configureBackBuffer(stageWidth, stageHeight, 1, true);
 			_timer.start();
 			_time = getTimer();

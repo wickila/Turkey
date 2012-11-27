@@ -62,7 +62,6 @@ package turkey
 				createProgram();
 				var arr:Array = BlendMode.getBlendFactors(_displayObjects[_renderIndex].blendMode);
 				Stage.context3D.setBlendFactors(arr[0],arr[1]);
-				Stage.context3D.setDepthTest(true,Context3DCompareMode.LESS_EQUAL);
 				Stage.context3D.setProgram(_program);
 				Stage.context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, Stage.flashMatrix, true);
 				Stage.context3D.drawTriangles(_indexBuffer,_renderIndex*6,2);
