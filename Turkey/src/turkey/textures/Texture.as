@@ -26,6 +26,7 @@ package turkey.textures
     import turkey.errors.AbstractClassError;
     import turkey.errors.MissingContextError;
     import turkey.utils.TurkeyUtils;
+    import turkey.utils.VertexData;
 
     /** <p>A texture stores the information that represents an image. It cannot be added to the
      *  display list directly; instead it has to be mapped onto a display object. In Starling, 
@@ -83,6 +84,7 @@ package turkey.textures
     public class Texture
     {
         private var mFrame:Rectangle;
+		protected var _showRect:Rectangle;
         private var mRepeat:Boolean;
 		private var _bitmapData:BitmapData;
         
@@ -93,11 +95,12 @@ package turkey.textures
         public function Texture(bitmapData:BitmapData)
         {
             if (Capabilities.isDebugger && 
-                getQualifiedClassName(this) == "starling.textures::Texture")
+                getQualifiedClassName(this) == "turkey.textures::Texture")
             {
                 throw new AbstractClassError();
             }
             _bitmapData = bitmapData;
+			_showRect = new Rectangle(0,0,bitmapData.width,bitmapData.height);
             mRepeat = false;
         }
         
@@ -208,6 +211,23 @@ package turkey.textures
                 canvas.dispose();
             }
         }
+		
+		public function adjustVertexData(vertexData:VertexData, vertexID:int, count:int):void
+		{
+			if (mFrame)
+			{
+				if (count != 4) 
+					throw new ArgumentError("Textures with a frame can only be used on quads");
+				
+				var deltaRight:Number  = mFrame.width  + mFrame.x - width;
+				var deltaBottom:Number = mFrame.height + mFrame.y - height;
+				
+				vertexData.translateVertex(vertexID,     -mFrame.x, -mFrame.y);
+				vertexData.translateVertex(vertexID + 1, -deltaRight, -mFrame.y);
+				vertexData.translateVertex(vertexID + 2, -mFrame.x, -deltaBottom);
+				vertexData.translateVertex(vertexID + 3, -deltaRight, -deltaBottom);
+			}
+		}
         
         /** Uploads ATF data from a ByteArray to a native texture. */
         internal static function uploadAtfData(nativeTexture:flash.display3D.textures.Texture, 
@@ -264,5 +284,10 @@ package turkey.textures
         
         /** Indicates if the alpha values are premultiplied into the RGB values. */
         public function get premultipliedAlpha():Boolean { return false; }
+		
+		public function get showRect():Rectangle
+		{
+			return _showRect;
+		}
     }
 }

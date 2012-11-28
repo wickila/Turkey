@@ -58,7 +58,7 @@ package turkey
 		{
 			for(_renderIndex=0;_renderIndex<_renderNum;_renderIndex++)
 			{
-				Stage.context3D.setTextureAt(0, _displayObjects[_renderIndex].texture);
+				Stage.context3D.setTextureAt(0, _displayObjects[_renderIndex].texture.base);
 				createProgram();
 				var arr:Array = BlendMode.getBlendFactors(_displayObjects[_renderIndex].blendMode);
 				Stage.context3D.setBlendFactors(arr[0],arr[1]);

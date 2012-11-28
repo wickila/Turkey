@@ -8,11 +8,12 @@ package
 	import flash.net.URLRequest;
 	
 	import turkey.display.Image;
-	import turkey.display.Sprite;
+	import turkey.display.MovieClip;
 	import turkey.display.Stage;
 	import turkey.events.TurkeyEvent;
 	import turkey.events.TurkeyMouseEvent;
 	import turkey.textures.Texture;
+	import turkey.textures.TextureAtlas;
 	
 	[SWF(width="1000",height="600")]
 	public class TurkeyTest extends flash.display.Sprite
@@ -21,6 +22,7 @@ package
 		private var _loader:Loader;
 		private var _urlLoader:URLLoader;
 		private var _img:Image;
+		private var _textureAlas:TextureAtlas;
 		public function TurkeyTest()
 		{
 			_stage2d = new Stage(this.stage,0xffffff);
@@ -31,46 +33,42 @@ package
 		{
 			_loader = new Loader();
 			_loader.contentLoaderInfo.addEventListener(flash.events.Event.COMPLETE,onTextureComplete);
-			_loader.load(new URLRequest("image.png"));
+			_loader.load(new URLRequest("texture.png"));
 		}
 		
 		protected function onTextureComplete(event:Event):void
 		{
-			var sp:turkey.display.Sprite = new turkey.display.Sprite();
-			_img = new Image(Texture.fromBitmapData(Bitmap(_loader.content).bitmapData));
-//			_img.rotation = 30*Math.PI/180;
-//			_img.x = 200;
-//			_img.alpha = .5;
-			sp.x = 200;
-			sp.addChild(_img);
-			_img.buttonMode = true;
-			_img.pixelHit = true;
-			_img.mouseEnabled = true;
-			sp.mouseEnabled = false;
-			sp.mouseChildren = true;
-//			sp.addEventListener(TurkeyMouseEvent.CLICK,onClick);
-			_img.addEventListener(TurkeyMouseEvent.CLICK,onClick);
-			
-			sp.y = 200;
-//			sp.alpha = .1;
-//			sp.rotation = 30*Math.PI/180;
-			_stage2d.addChild(sp);
-//			_img = new Image(Texture.fromBitmapData(Bitmap(_loader.content).bitmapData));
-//			_img.x = 100;
-//			_img.y = 100;
-//			_img.alpha = .8;
-//			sp.x = 100;
-//			_stage2d.addChild(_img);
-			addEventListener(Event.ENTER_FRAME,onEnterFrame);
-			function onEnterFrame(event1:Event):void
-			{
-//				sp.rotation += Math.PI/180;
-			}
+			_urlLoader = new URLLoader();
+			_urlLoader.addEventListener(Event.COMPLETE,onDesComplete);
+			_urlLoader.load(new URLRequest("description.xml"));
+		}
+		
+		protected function onDesComplete(event:Event):void
+		{
+			var textureBody:Texture = Texture.fromBitmapData(Bitmap(_loader.content).bitmapData);//动画材质
+			_textureAlas = new TextureAtlas(textureBody,new XML(_urlLoader.data));//动画解析文件
+			var img:Image = new Image(textureBody);
+			var mc:MovieClip = new MovieClip(_textureAlas.getTextures("test222"));
+			mc.addEventListener(TurkeyMouseEvent.CLICK,onClick);
+			_stage2d.addChild(mc);
+			img.buttonMode = true;
+			img.pixelHit = true;
+			mc.buttonMode = true;
+			trace(mc.width);
+			mc.pivotX = 74;
+			mc.pivotY = 362;
+			mc.x = mc.y = 200;
+			mc.pixelHit = true;
 			
 			function onClick(event:TurkeyMouseEvent):void
 			{
-				trace(event.target);
-				trace(event.currentTarget);
+				if(mc.playing)
+				{
+					mc.puase();
+				}else
+				{
+					mc.play();
+				}
 			}
 		}
 	}

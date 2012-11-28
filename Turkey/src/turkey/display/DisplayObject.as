@@ -1,6 +1,5 @@
 package turkey.display
 {
-	import flash.display3D.textures.TextureBase;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
@@ -14,6 +13,7 @@ package turkey.display
 	import turkey.errors.AbstractMethodError;
 	import turkey.events.EventDispatcher;
 	import turkey.events.TurkeyMouseEvent;
+	import turkey.textures.Texture;
 	import turkey.utils.MatrixUtil;
 	import turkey.utils.VertexData;
 	
@@ -322,7 +322,7 @@ package turkey.display
 			return getBounds(this,sHelperRectangle).contains(localPoint.x,localPoint.y)?this:null;
 		}
 		
-		public function get texture():TextureBase
+		public function get texture():Texture
 		{
 			return null;
 		}
