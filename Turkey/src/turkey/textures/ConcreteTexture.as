@@ -16,7 +16,6 @@ package turkey.textures
     import flash.display3D.textures.TextureBase;
     
     import turkey.core.Turkey;
-    import turkey.display.Stage;
     import turkey.events.TurkeyEvent;
 
     /** A ConcreteTexture wraps a Stage3D texture object, storing the properties of the texture. */

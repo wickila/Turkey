@@ -65,6 +65,7 @@ package turkey.display
 			stage3D = stage.stage3Ds[0];
 			stage3D.addEventListener(flash.events.Event.CONTEXT3D_CREATE,onContext3DCrete);
 			stage2D.addEventListener(MouseEvent.CLICK,onStageClick);
+			stage2D.addEventListener(MouseEvent.RIGHT_CLICK,onStageClick);
 			stage2D.addEventListener(MouseEvent.MOUSE_MOVE,onMouseMove);
 			stage3D.requestContext3D();
         }
@@ -113,7 +114,13 @@ package turkey.display
 			var target:DisplayObject = hitTest(p,true);
 			var child:DisplayObject = target;
 			child.globalToLocal(new Point(event.stageX,event.stageY),p);
-			child.dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.CLICK,target,p.x,p.y,event.stageX,event.stageY));
+			if(event.type == MouseEvent.RIGHT_CLICK)
+			{
+				child.dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.RIGHT_CLICK,target,p.x,p.y,event.stageX,event.stageY));
+			}else
+			{
+				child.dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.CLICK,target,p.x,p.y,event.stageX,event.stageY));
+			}
 		}
 		
 		private function onMouseMove(event:MouseEvent):void

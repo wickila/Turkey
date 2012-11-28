@@ -5,6 +5,7 @@ package turkey.events
 	public class TurkeyMouseEvent extends TurkeyEvent
 	{
 		public static const CLICK:String = "turkeyClick";
+		public static const RIGHT_CLICK:String = "turkeyRightClick";
 		public static const MOUSE_MOVE:String = "turkeyMouseMove";
 		public static const MOUSE_OVER:String = "turkeyMouseOver";
 		public static const MOUSE_OUT:String = "turkeyMouseOut";

@@ -77,11 +77,10 @@ package turkey
 		{
 			_vertexbuffer && _vertexbuffer.dispose();
 			_indexBuffer && _indexBuffer.dispose();
-			_vertexData = new VertexData(0);
-			_vertexData.numVertices = _renderNum * 4;
+			_vertexData = new VertexData(_renderNum * 4);
 			for(var i:int=0;i<_renderNum;i++)
 			{
-				_displayObjects[i].vertexData.copyTo(_vertexData, i*4, 0, (i+1)*4);
+				_displayObjects[i].vertexData.copyTo(_vertexData, i*4);
 				_vertexData.transformVertex(i*4,_matrices[i],4);
 				_vertexData.setAlpha(i*4,_alhpas[i]);
 				_vertexData.setAlpha(i*4+1,_alhpas[i]);
@@ -116,8 +115,9 @@ package turkey
 					var numChildren:uint = DisplayObjectContainer(child).numChildren;
 					for(var i:int;i<numChildren;i++)
 					{
-						MatrixUtil.prependMatrix(matrix,DisplayObjectContainer(child).getChildAt(i).transformationMatrix);
-						addChildForRender(DisplayObjectContainer(child).getChildAt(i),matrix,alpha)
+						var newMatrix:Matrix = matrix.clone();
+						MatrixUtil.prependMatrix(newMatrix,DisplayObjectContainer(child).getChildAt(i).transformationMatrix);
+						addChildForRender(DisplayObjectContainer(child).getChildAt(i),newMatrix,alpha)
 					}
 				}else
 				{

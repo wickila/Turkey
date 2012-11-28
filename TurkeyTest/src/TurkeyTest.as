@@ -47,17 +47,25 @@ package
 			var textureBody:Texture = Texture.fromBitmapData(Bitmap(_loader.content).bitmapData);//动画材质
 			_textureAlas = new TextureAtlas(textureBody,new XML(_urlLoader.data));//动画解析文件
 			var img:Image = new Image(textureBody);
+			Turkey.stage.addChild(img);
+			img.pivotX = -100;
+			img.pivotY = -100;
 			var mc:MovieClip = new MovieClip(_textureAlas.getTextures("test222"));
 			mc.addEventListener(TurkeyMouseEvent.CLICK,onClick);
-			Turkey.stage.addChild(mc);
-			img.buttonMode = true;
-			img.pixelHit = true;
-			mc.buttonMode = true;
-			trace(mc.width);
 			mc.pivotX = 74;
 			mc.pivotY = 362;
 			mc.x = mc.y = 200;
 			mc.pixelHit = true;
+//			Turkey.stage.addChild(mc);
+			
+			mc = new MovieClip(_textureAlas.getTextures("test222"));
+			mc.addEventListener(TurkeyMouseEvent.CLICK,onClick);
+			mc.pivotX = 74;
+			mc.pivotY = 362;
+			mc.x = mc.y = 400;
+			mc.pixelHit = true;
+			Turkey.stage.addChild(mc);
+			
 			
 			function onClick(event:TurkeyMouseEvent):void
 			{
