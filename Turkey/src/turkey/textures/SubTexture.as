@@ -14,6 +14,8 @@ package turkey.textures
     import flash.geom.Point;
     import flash.geom.Rectangle;
     
+    import turkey.utils.VertexData;
+    
     /** A SubTexture represents a section of another texture. This is achieved solely by 
      *  manipulation of texture coordinates, making the class very efficient. 
      *
@@ -40,10 +42,14 @@ package turkey.textures
             mOwnsParent = ownsParent;
             
             if (region == null) setClipping(new Rectangle(0, 0, 1, 1));
-            else setClipping(new Rectangle(region.x / parentTexture.width,
+            else
+			{
+				setClipping(new Rectangle(region.x / parentTexture.width,
                                            region.y / parentTexture.height,
                                            region.width / parentTexture.width,
                                            region.height / parentTexture.height));
+				_showRect = region;
+			}
         }
         
         /** Disposes the parent texture if this texture owns it. */
@@ -69,6 +75,24 @@ package turkey.textures
                 parentTexture = parentTexture.mParent as SubTexture;
             }
         }
+		
+		public override function adjustVertexData(vertexData:VertexData, vertexID:int, count:int):void
+		{
+			super.adjustVertexData(vertexData, vertexID, count);
+			
+			var clipX:Number = mRootClipping.x;
+			var clipY:Number = mRootClipping.y;
+			var clipWidth:Number  = mRootClipping.width;
+			var clipHeight:Number = mRootClipping.height;
+			var endIndex:int = vertexID + count;
+			
+			for (var i:int=vertexID; i<endIndex; ++i)
+			{
+				vertexData.getTexCoords(i, sTexCoords);
+				vertexData.setTexCoords(i, clipX + sTexCoords.x * clipWidth,
+					clipY + sTexCoords.y * clipHeight);
+			}
+		}
         
         /** The texture which the subtexture is based on. */ 
         public function get parent():Texture { return mParent; }

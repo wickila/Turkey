@@ -36,8 +36,8 @@ package turkey.display
     {
         private var mTinted:Boolean;
         /** Helper objects. */
-        private static var sHelperPoint:Point = new Point();
-        private static var sHelperMatrix:Matrix = new Matrix();
+        protected static var sHelperPoint:Point = new Point();
+		protected static var sHelperMatrix:Matrix = new Matrix();
         
         /** Creates a quad with a certain size and color. The last parameter controls if the 
          *  alpha value should be premultiplied into the color values on rendering, which can
@@ -70,7 +70,7 @@ package turkey.display
             
             if (targetSpace == this) // optimization
             {
-                _vertexData.getPosition(3, sHelperPoint);
+                vertexData.getPosition(3, sHelperPoint);
                 resultRect.setTo(0.0, 0.0, sHelperPoint.x, sHelperPoint.y);
             }
             else if (targetSpace == parent && rotation == 0.0) // optimization
