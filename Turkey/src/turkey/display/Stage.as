@@ -24,13 +24,13 @@ package turkey.display
     
     public class Stage extends DisplayObjectContainer
     {
-		public static var stage2D:flash.display.Stage;
-		public static var stage3D:Stage3D;
-		public static var context3D:Context3D;
-        public static var stageWidth:int;
-        public static var stageHeight:int;
-		public static var flashMatrix:Matrix3D;
-		public static var trasformMatix:Matrix;
+		public var stage2D:flash.display.Stage;
+		public var stage3D:Stage3D;
+		public var context3D:Context3D;
+        public var stageWidth:int;
+        public var stageHeight:int;
+		public var flashMatrix:Matrix3D;
+		public var trasformMatix:Matrix;
         private var _color:uint;
         private var mEnterFrameEvent:TurkeyEnterFrameEvent = new TurkeyEnterFrameEvent(TurkeyEvent.ENTER_FRAME, 0.0);
 		private var _timer:Timer;
@@ -41,7 +41,7 @@ package turkey.display
 		private static var _bColorG:uint;
 		private static var _bColorB:uint;
         
-        public function Stage(stage:flash.display.Stage, color:uint=0, frameRate:int=60)
+        public function Stage(stage:flash.display.Stage, frameRate:int=60,color:uint=0)
         {
 			stage2D = stage;
             stageWidth = stage.stageWidth;
@@ -102,7 +102,7 @@ package turkey.display
 			TurkeyRenderer.render(this,trasformMatix,1);
 		}
 		
-		public static function clear():void
+		public function clear():void
 		{
 			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
 		}

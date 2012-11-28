@@ -7,9 +7,9 @@ package
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	
+	import turkey.core.Turkey;
 	import turkey.display.Image;
 	import turkey.display.MovieClip;
-	import turkey.display.Stage;
 	import turkey.events.TurkeyEvent;
 	import turkey.events.TurkeyMouseEvent;
 	import turkey.textures.Texture;
@@ -18,15 +18,14 @@ package
 	[SWF(width="1000",height="600")]
 	public class TurkeyTest extends flash.display.Sprite
 	{
-		private var _stage2d:Stage;
 		private var _loader:Loader;
 		private var _urlLoader:URLLoader;
 		private var _img:Image;
 		private var _textureAlas:TextureAtlas;
 		public function TurkeyTest()
 		{
-			_stage2d = new Stage(this.stage,0xffffff);
-			_stage2d.addEventListener(TurkeyEvent.COMPLETE,__createComplete);
+			Turkey.init(stage);
+			Turkey.stage.addEventListener(TurkeyEvent.COMPLETE,__createComplete);
 		}
 		
 		protected function __createComplete(event:TurkeyEvent):void
@@ -50,7 +49,7 @@ package
 			var img:Image = new Image(textureBody);
 			var mc:MovieClip = new MovieClip(_textureAlas.getTextures("test222"));
 			mc.addEventListener(TurkeyMouseEvent.CLICK,onClick);
-			_stage2d.addChild(mc);
+			Turkey.stage.addChild(mc);
 			img.buttonMode = true;
 			img.pixelHit = true;
 			mc.buttonMode = true;

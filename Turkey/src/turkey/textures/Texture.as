@@ -22,6 +22,7 @@ package turkey.textures
     import flash.utils.ByteArray;
     import flash.utils.getQualifiedClassName;
     
+    import turkey.core.Turkey;
     import turkey.display.Stage;
     import turkey.errors.AbstractClassError;
     import turkey.errors.MissingContextError;
@@ -134,7 +135,7 @@ package turkey.textures
             var origHeight:int  = data.height;
             var legalWidth:int  = TurkeyUtils.getNextPowerOfTwo(origWidth);
             var legalHeight:int = TurkeyUtils.getNextPowerOfTwo(origHeight);
-            var context:Context3D = Stage.context3D;
+            var context:Context3D = Turkey.stage.context3D;
             var potData:BitmapData;
             
             if (context == null) throw new MissingContextError();

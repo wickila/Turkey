@@ -10,6 +10,7 @@ package turkey
 	import flash.display3D.VertexBuffer3D;
 	import flash.geom.Matrix;
 	
+	import turkey.core.Turkey;
 	import turkey.display.DisplayObject;
 	import turkey.display.DisplayObjectContainer;
 	import turkey.display.Stage;
@@ -45,26 +46,26 @@ package turkey
 		 */		
 		public static function render(child:DisplayObject,parentMatrix:Matrix,parentAlpha:Number=1):void
 		{
-			Stage.clear();
+			Turkey.stage.clear();
 			reset();
 			addChildForRender(child,parentMatrix,parentAlpha);
 			if(_renderNum<1)return;
 			rebuildBuffer();
 			drawTriangles();
-			Stage.context3D.present();
+			Turkey.stage.context3D.present();
 		}
 		
 		private static function drawTriangles():void
 		{
 			for(_renderIndex=0;_renderIndex<_renderNum;_renderIndex++)
 			{
-				Stage.context3D.setTextureAt(0, _displayObjects[_renderIndex].texture.base);
+				Turkey.stage.context3D.setTextureAt(0, _displayObjects[_renderIndex].texture.base);
 				createProgram();
 				var arr:Array = BlendMode.getBlendFactors(_displayObjects[_renderIndex].blendMode);
-				Stage.context3D.setBlendFactors(arr[0],arr[1]);
-				Stage.context3D.setProgram(_program);
-				Stage.context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, Stage.flashMatrix, true);
-				Stage.context3D.drawTriangles(_indexBuffer,_renderIndex*6,2);
+				Turkey.stage.context3D.setBlendFactors(arr[0],arr[1]);
+				Turkey.stage.context3D.setProgram(_program);
+				Turkey.stage.context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, Turkey.stage.flashMatrix, true);
+				Turkey.stage.context3D.drawTriangles(_indexBuffer,_renderIndex*6,2);
 			}
 		}
 		
@@ -88,14 +89,14 @@ package turkey
 				_vertexData.setAlpha(i*4+3,_alhpas[i]);
 				_indices.push(i*4,i*4+1,i*4+2,i*4+1,i*4+3,i*4+2);
 			}
-			_vertexbuffer = Stage.context3D.createVertexBuffer(_renderNum * 4,VertexData.ELEMENTS_PER_VERTEX);
-			_indexBuffer = Stage.context3D.createIndexBuffer(_indices.length);
+			_vertexbuffer = Turkey.stage.context3D.createVertexBuffer(_renderNum * 4,VertexData.ELEMENTS_PER_VERTEX);
+			_indexBuffer = Turkey.stage.context3D.createIndexBuffer(_indices.length);
 			
 			_vertexbuffer.uploadFromVector(_vertexData.rawData,0,_renderNum * 4);
 			_indexBuffer.uploadFromVector(_indices,0,_indices.length);
-			Stage.context3D.setVertexBufferAt(0, _vertexbuffer, VertexData.POSITION_OFFSET, Context3DVertexBufferFormat.FLOAT_2); 
-			Stage.context3D.setVertexBufferAt(1, _vertexbuffer, VertexData.COLOR_OFFSET, Context3DVertexBufferFormat.FLOAT_4);
-			Stage.context3D.setVertexBufferAt(2, _vertexbuffer, VertexData.TEXCOORD_OFFSET, Context3DVertexBufferFormat.FLOAT_2);
+			Turkey.stage.context3D.setVertexBufferAt(0, _vertexbuffer, VertexData.POSITION_OFFSET, Context3DVertexBufferFormat.FLOAT_2); 
+			Turkey.stage.context3D.setVertexBufferAt(1, _vertexbuffer, VertexData.COLOR_OFFSET, Context3DVertexBufferFormat.FLOAT_4);
+			Turkey.stage.context3D.setVertexBufferAt(2, _vertexbuffer, VertexData.TEXCOORD_OFFSET, Context3DVertexBufferFormat.FLOAT_2);
 		}
 		/**
 		 *	加入到渲染队列中 
@@ -155,7 +156,7 @@ package turkey
 				"mul ft1, ft1, v0.w\n"+
 				"mov oc, ft1"
 			);
-			_program = Stage.context3D.createProgram();
+			_program = Turkey.stage.context3D.createProgram();
 			_program.upload(vertexShaderAssembler.agalcode, fragmentShaderAssembler.agalcode);
 		}
 	}

@@ -329,7 +329,7 @@ package turkey.display
 		
 		/** The root object the display object is connected to (i.e. an instance of the class 
 		 *  that was passed to the Starling constructor), or null if the object is not connected
-		 *  to the stage. */
+		 *  to the Turkey.stage. */
 		public function get root():DisplayObject
 		{
 			var currentObject:DisplayObject = this;

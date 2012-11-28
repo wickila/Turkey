@@ -22,7 +22,7 @@ package turkey.events
         public static const ENTER_FRAME:String = "enterFrame";
         /** Event type for a display object that is removed from its parent. */
         public static const REMOVED:String = "removed";
-        /** Event type for a display object that is removed from the stage. */
+        /** Event type for a display object that is removed from the Turkey.stage. */
         public static const REMOVED_FROM_STAGE:String = "removedFromStage";
         /** Event type for a triggered button. */
         public static const TRIGGERED:String = "triggered";

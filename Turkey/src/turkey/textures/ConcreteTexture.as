@@ -15,6 +15,7 @@ package turkey.textures
     import flash.display3D.Context3DTextureFormat;
     import flash.display3D.textures.TextureBase;
     
+    import turkey.core.Turkey;
     import turkey.display.Stage;
     import turkey.events.TurkeyEvent;
 
@@ -58,7 +59,7 @@ package turkey.textures
         
         private function onContextCreated(event:TurkeyEvent):void
         {
-            var context:Context3D = Stage.context3D;
+            var context:Context3D = Turkey.stage.context3D;
             var bitmapData:BitmapData = mData as BitmapData;
             var atfData:AtfData = mData as AtfData;
             var nativeTexture:flash.display3D.textures.Texture;
