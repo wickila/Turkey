@@ -36,6 +36,7 @@ package turkey.display
 		private var _timer:Timer;
 		private var _time:uint;
 		private var _frameRate:int;
+		private var _mouseMoveEnable:Boolean = false;
 		private static var _bColorA:uint;
 		private static var _bColorR:uint;
 		private static var _bColorG:uint;
@@ -66,10 +67,35 @@ package turkey.display
 			stage3D.addEventListener(flash.events.Event.CONTEXT3D_CREATE,onContext3DCrete);
 			stage2D.addEventListener(MouseEvent.CLICK,onStageClick);
 			stage2D.addEventListener(MouseEvent.RIGHT_CLICK,onStageClick);
-			stage2D.addEventListener(MouseEvent.MOUSE_MOVE,onMouseMove);
+			stage2D.addEventListener(MouseEvent.MOUSE_DOWN,onStageClick);
+			stage2D.addEventListener(MouseEvent.MOUSE_UP,onStageClick);
+			stage2D.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN,onStageClick);
+			stage2D.addEventListener(MouseEvent.RIGHT_MOUSE_UP,onStageClick);
 			stage3D.requestContext3D();
         }
-		
+		/**
+		 * 
+		 * @return 是否监听鼠标移动事件，此事件比较耗效率，所以默认禁用
+		 * 
+		 */		
+		public function get mouseMoveEnable():Boolean
+		{
+			return _mouseMoveEnable;
+		}
+
+		public function set mouseMoveEnable(value:Boolean):void
+		{
+			if(_mouseMoveEnable == value)return;
+			_mouseMoveEnable = value;
+			if(_mouseMoveEnable)
+			{
+				stage2D.addEventListener(MouseEvent.MOUSE_MOVE,onMouseMove);
+			}else
+			{
+				stage2D.removeEventListener(MouseEvent.MOUSE_MOVE,onMouseMove);
+			}
+		}
+
 		private function onContext3DCrete(event:flash.events.Event):void
 		{
 			context3D = stage3D.context3D;
@@ -112,15 +138,28 @@ package turkey.display
 		{
 			var p:Point = new Point(event.stageX,event.stageY);
 			var target:DisplayObject = hitTest(p,true);
-			var child:DisplayObject = target;
-			child.globalToLocal(new Point(event.stageX,event.stageY),p);
-			if(event.type == MouseEvent.RIGHT_CLICK)
+			target.globalToLocal(new Point(event.stageX,event.stageY),p);
+			target.dispatchEvent(getEventByType(event.type,target,p,event.stageX,event.stageY));
+		}
+		
+		private function getEventByType(type:String,target:DisplayObject,localPoint:Point,stageX:Number,stageY:Number):TurkeyMouseEvent
+		{
+			switch(type)
 			{
-				child.dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.RIGHT_CLICK,target,p.x,p.y,event.stageX,event.stageY));
-			}else
-			{
-				child.dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.CLICK,target,p.x,p.y,event.stageX,event.stageY));
+				case MouseEvent.CLICK:
+					return new TurkeyMouseEvent(TurkeyMouseEvent.CLICK,target,localPoint.x,localPoint.y,stageX,stageY);
+				case MouseEvent.RIGHT_CLICK:
+					return new TurkeyMouseEvent(TurkeyMouseEvent.RIGHT_CLICK,target,localPoint.x,localPoint.y,stageX,stageY);
+				case MouseEvent.MOUSE_DOWN:
+					return new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_DOWN,target,localPoint.x,localPoint.y,stageX,stageY);
+				case MouseEvent.RIGHT_MOUSE_DOWN:
+					return new TurkeyMouseEvent(TurkeyMouseEvent.RIGHT_MOUSE_DOWN,target,localPoint.x,localPoint.y,stageX,stageY);
+				case MouseEvent.MOUSE_UP:
+					return new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_UP,target,localPoint.x,localPoint.y,stageX,stageY);
+				case MouseEvent.RIGHT_MOUSE_UP:
+					return new TurkeyMouseEvent(TurkeyMouseEvent.RIGHT_MOUSE_UP,target,localPoint.x,localPoint.y,stageX,stageY);
 			}
+			return null;
 		}
 		
 		private function onMouseMove(event:MouseEvent):void

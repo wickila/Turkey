@@ -7,10 +7,10 @@ package turkey.display
 	
 	public class MovieClip extends Image
 	{
-		private var _textures:Vector.<Texture>;
-		private var _index:int=0;
-		private var _totalFrame:int;
-		private var _playing:Boolean=true;
+		protected var _textures:Vector.<Texture>;
+		protected var _index:int=0;
+		protected var _totalFrame:int;
+		protected var _playing:Boolean=true;
 		public function MovieClip(textures:Vector.<Texture>)
 		{
 			super(textures[0]);
@@ -34,10 +34,20 @@ package turkey.display
 			update();
 		}
 		
-		private function update():void
+		protected function update():void
 		{
 			_index = (_index+1)%_totalFrame;
 			texture = _textures[_index];
+		}
+		
+		public function get totalFrame():int
+		{
+			return _totalFrame;
+		}
+		
+		public function get currentFrame():int
+		{
+			return _index+1;
 		}
 		
 		override public function get width():Number

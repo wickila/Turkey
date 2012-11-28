@@ -152,7 +152,7 @@ package turkey.display
 
 		public function get width():Number
 		{
-			return _width;
+			return getBounds(_parent, sHelperRectangle).width;
 		}
 
 		public function set width(value:Number):void
@@ -168,7 +168,7 @@ package turkey.display
 
 		public function get height():Number
 		{
-			return _height;
+			return getBounds(_parent, sHelperRectangle).height;
 		}
 
 		public function set height(value:Number):void

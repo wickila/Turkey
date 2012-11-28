@@ -9,6 +9,10 @@ package turkey.events
 		public static const MOUSE_MOVE:String = "turkeyMouseMove";
 		public static const MOUSE_OVER:String = "turkeyMouseOver";
 		public static const MOUSE_OUT:String = "turkeyMouseOut";
+		public static const MOUSE_DOWN:String = "turkeyMouseDown";
+		public static const MOUSE_UP:String = "turkeyMouseUp";
+		public static const RIGHT_MOUSE_DOWN:String = "turkeyRightMouseDown";
+		public static const RIGHT_MOUSE_UP:String = "turkeyRightMouseUp";
 		
 		public var localX:Number;
 		public var localY:Number;
