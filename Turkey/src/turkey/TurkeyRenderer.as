@@ -13,6 +13,7 @@ package turkey
 	import turkey.core.Turkey;
 	import turkey.display.DisplayObject;
 	import turkey.display.DisplayObjectContainer;
+	import turkey.display.Image;
 	import turkey.display.Stage;
 	import turkey.enumrate.BlendMode;
 	import turkey.utils.MatrixUtil;
@@ -51,6 +52,7 @@ package turkey
 			addChildForRender(child,parentMatrix,parentAlpha);
 			if(_renderNum<1)return;
 			rebuildBuffer();
+			Turkey.stage.context3D.setProgram(Turkey.getProgram(Image.IMAGE_PROGRAM));
 			drawTriangles();
 			Turkey.stage.context3D.present();
 		}
@@ -60,10 +62,8 @@ package turkey
 			for(_renderIndex=0;_renderIndex<_renderNum;_renderIndex++)
 			{
 				Turkey.stage.context3D.setTextureAt(0, _displayObjects[_renderIndex].texture.base);
-				createProgram();
 				var arr:Array = BlendMode.getBlendFactors(_displayObjects[_renderIndex].blendMode);
 				Turkey.stage.context3D.setBlendFactors(arr[0],arr[1]);
-				Turkey.stage.context3D.setProgram(_program);
 				Turkey.stage.context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, Turkey.stage.flashMatrix, true);
 				Turkey.stage.context3D.drawTriangles(_indexBuffer,_renderIndex*6,2);
 			}
@@ -140,24 +140,6 @@ package turkey
 			_displayObjects = new Vector.<DisplayObject>();
 			_matrices = new Vector.<Matrix>();
 			_alhpas = new Vector.<Number>();
-		}
-		
-		private static function createProgram():void
-		{
-			var vertexShaderAssembler:AGALMiniAssembler = new AGALMiniAssembler();
-			vertexShaderAssembler.assemble(Context3DProgramType.VERTEX,
-				"m44 op, va0, vc0\n" + // pos to clipspace
-				"mov v0, va1\n" +// copy rgba
-				"mov v1, va2"//copy uv
-			);
-			var fragmentShaderAssembler:AGALMiniAssembler= new AGALMiniAssembler();
-			fragmentShaderAssembler.assemble( Context3DProgramType.FRAGMENT,
-				"tex ft1, v1, fs0 <2d,linear,nomip>\n" +
-				"mul ft1, ft1, v0.w\n"+
-				"mov oc, ft1"
-			);
-			_program = Turkey.stage.context3D.createProgram();
-			_program.upload(vertexShaderAssembler.agalcode, fragmentShaderAssembler.agalcode);
 		}
 	}
 }

@@ -14,6 +14,8 @@ package turkey.display
 		protected var _bitmapdata:BitmapData;
 		private var _vertexDataCache:VertexData;
 		protected var _vertexDataChanged:Boolean;
+		
+		public static const IMAGE_PROGRAM:String = "imageProgram";
 		public function Image(texture:Texture)
 		{
 			if (texture)

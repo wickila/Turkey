@@ -104,7 +104,7 @@ package turkey.display
 			context3D.configureBackBuffer(stageWidth, stageHeight, 2, true);
 			_timer.start();
 			_time = getTimer();
-			dispatchEvent(new TurkeyEvent(TurkeyEvent.COMPLETE));
+			dispatchEvent(new TurkeyEvent(TurkeyEvent.CONTEXT3D_CREATE));
 		}
 		
 		private function onTimer(event:TimerEvent):void
