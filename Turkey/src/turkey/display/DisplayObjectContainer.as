@@ -6,6 +6,8 @@ package turkey.display
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
+	import turkey.TurkeyRenderer;
+	import turkey.core.Turkey;
 	import turkey.core.turkey_internal;
 	import turkey.events.TurkeyEvent;
 	import turkey.utils.MatrixUtil;
@@ -199,7 +201,6 @@ package turkey.display
 			}                
 		}
 		
-		/** @inheritDoc */
 		public override function hitTest(localPoint:Point,forMouse:Boolean = false):DisplayObject
 		{
 			if (forMouse && (!visible||(!mouseEnabled&&!mouseChildren)))
@@ -213,7 +214,6 @@ package turkey.display
 				{
 					var child:DisplayObject = _children[i];
 					getTransformationMatrix(child, sHelperMatrix);
-					
 					MatrixUtil.transformCoords(sHelperMatrix, localX, localY, sHelperPoint);
 					var target:DisplayObject = child.hitTest(sHelperPoint,forMouse);
 					
@@ -248,6 +248,31 @@ package turkey.display
 			for(var i:int=0;i<_children.length;i++)
 			{
 				_children[i].hitMouse(stageX,stageY);
+			}
+		}
+		
+		override public function addToRenderList(parentMatrix:Matrix,parentAlpha:Number,parentFilter:Boolean):void
+		{
+			if(!hasVisibleArea)return;
+			if(filters&&filters.length)
+			{
+				TurkeyRenderer.preFilter();
+			}
+			for(var i:int=0;i<numChildren;i++)
+			{
+				var child:DisplayObject = getChildAt(i);
+				var matrix:Matrix = parentMatrix.clone();
+				MatrixUtil.prependMatrix(matrix,transformationMatrix);
+				child.addToRenderList(matrix,parentAlpha*alpha,(filters&&filters.length>0));
+			}
+			if(filters&&filters.length)
+			{
+				TurkeyRenderer.render();
+				for(i=0;i<filters.length;i++)
+				{
+					filters[i].render(i==filters.length-1&&!parentFilter);
+				}
+				TurkeyRenderer.endFilter();
 			}
 		}
 	}

@@ -8,6 +8,7 @@ package turkey.display
 	import flash.ui.MouseCursor;
 	import flash.utils.getQualifiedClassName;
 	
+	import turkey.TurkeyRenderer;
 	import turkey.enumrate.BlendMode;
 	import turkey.errors.AbstractClassError;
 	import turkey.errors.AbstractMethodError;
@@ -58,50 +59,6 @@ package turkey.display
 				throw new AbstractClassError();
 			}
 			_transformationMatrix = new Matrix();
-		}
-
-		public function get pixelHit():Boolean
-		{
-			return _pixelHit;
-		}
-
-		public function set pixelHit(value:Boolean):void
-		{
-			_pixelHit = value;
-		}
-
-		public function get buttonMode():Boolean
-		{
-			return _buttonMode;
-		}
-
-		public function set buttonMode(value:Boolean):void
-		{
-			if(_buttonMode == value)return;
-			_buttonMode = value;
-			Mouse.cursor = (_mouseEnabled && _buttonMode && !_mouseOut) ? MouseCursor.BUTTON : MouseCursor.AUTO;
-		}
-
-		internal function get mouseOut():Boolean
-		{
-			return _mouseOut;
-		}
-
-		internal function set mouseOut(value:Boolean):void
-		{
-			if(_mouseOut == value)return;
-			_mouseOut = value;
-			if(_mouseEnabled)
-			{
-				if(_mouseOut)
-				{
-					dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_OUT,this,mouseX,mouseY,_stageMousePoint.x,_stageMousePoint.y));
-				}else
-				{
-					dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_OVER,this,mouseX,mouseY,_stageMousePoint.x,_stageMousePoint.y));
-				}
-			}
-			Mouse.cursor = (_mouseEnabled && _buttonMode && !_mouseOut) ? MouseCursor.BUTTON : MouseCursor.AUTO;
 		}
 
 		public function get x():Number
@@ -205,7 +162,11 @@ package turkey.display
 			_scaleY = value;
 			_matrixChanged = true;
 		}
-		
+		/**
+		 * 
+		 * @return 注册点X
+		 * 
+		 */		
 		public function get pivotX():Number { return _pivotX; }
 		public function set pivotX(value:Number):void 
 		{
@@ -213,7 +174,11 @@ package turkey.display
 			_pivotX = value;
 			_matrixChanged = true;
 		}
-		
+		/**
+		 * 
+		 * @return 注册点Y 
+		 * 
+		 */		
 		public function get pivotY():Number { return _pivotY; }
 		public function set pivotY(value:Number):void 
 		{
@@ -262,6 +227,54 @@ package turkey.display
 		public function set blendMode(value:String):void
 		{
 			_blendMode = value;
+		}
+		/**
+		 * 
+		 * @return 是否进行像素级别的精确碰撞，如果为false，则只与显示矩形碰撞
+		 * 
+		 */		
+		public function get pixelHit():Boolean
+		{
+			return _pixelHit;
+		}
+		
+		public function set pixelHit(value:Boolean):void
+		{
+			_pixelHit = value;
+		}
+		
+		public function get buttonMode():Boolean
+		{
+			return _buttonMode;
+		}
+		
+		public function set buttonMode(value:Boolean):void
+		{
+			if(_buttonMode == value)return;
+			_buttonMode = value;
+			Mouse.cursor = (_mouseEnabled && _buttonMode && !_mouseOut) ? MouseCursor.BUTTON : MouseCursor.AUTO;
+		}
+		
+		internal function get mouseOut():Boolean
+		{
+			return _mouseOut;
+		}
+		
+		internal function set mouseOut(value:Boolean):void
+		{
+			if(_mouseOut == value)return;
+			_mouseOut = value;
+			if(_mouseEnabled)
+			{
+				if(_mouseOut)
+				{
+					dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_OUT,this,mouseX,mouseY,_stageMousePoint.x,_stageMousePoint.y));
+				}else
+				{
+					dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_OVER,this,mouseX,mouseY,_stageMousePoint.x,_stageMousePoint.y));
+				}
+			}
+			Mouse.cursor = (_mouseEnabled && _buttonMode && !_mouseOut) ? MouseCursor.BUTTON : MouseCursor.AUTO;
 		}
 		
 		public function get vertexData():VertexData
@@ -316,7 +329,13 @@ package turkey.display
 		{
 			return _localMousePoint.y;
 		}
-		
+		/**
+		 *	
+		 * @param localPoint 本地坐标点
+		 * @param forMouse	是否是鼠标碰撞，如果是鼠标碰撞，会受到mouseEnable与mouseChildren的影响
+		 * @return localPoint碰撞到的显示对象
+		 * 
+		 */		
 		public function hitTest(localPoint:Point,forMouse:Boolean = false):DisplayObject
 		{
 			return getBounds(this,sHelperRectangle).contains(localPoint.x,localPoint.y)?this:null;
@@ -449,7 +468,11 @@ package turkey.display
 			
 			return resultMatrix;
 		}     
-		
+		/**
+		 * 
+		 * @return 本地位置信息的二维矩阵
+		 * 
+		 */		
 		public function get transformationMatrix():Matrix
 		{
 			if(_matrixChanged)
@@ -495,7 +518,7 @@ package turkey.display
 				_pivotX = _pivotY = 0;
 			}else
 			{
-				trace("[Starling] Cannot calculate individual transformation matrix properties.",
+				trace("[Turkey] Cannot calculate individual transformation matrix properties.",
 					"This warning is issued only once.");
 			}
 		}
@@ -522,7 +545,12 @@ package turkey.display
 		{
 			return _alpha != 0.0 && _visible && _scaleX != 0.0 && _scaleY != 0.0;
 		}
-		
+		/**
+		 * 与鼠标碰撞，方便响应MouseOver与MouseOut事件
+		 * @param stageX 全局坐标点x
+		 * @param stageY 全局坐标点y
+		 * 
+		 */		
 		public function hitMouse(stageX:Number,stageY:Number):void
 		{
 			_stageMousePoint.setTo(stageX,stageY);
@@ -533,6 +561,33 @@ package turkey.display
 			}else
 			{
 				mouseOut = true;
+			}
+		}
+		/**
+		 *	加入到渲染队列当中，如果有滤镜，则添加进渲染队列，并且渲染(因为如果有子对象，可以一次画完以后，再一次运用滤镜，而不必对每个子对象都分别运用滤镜，可以提高效率)
+		 * @param parentMatrix 父对象的二维空间矩阵
+		 * @param parentAlpha 父对象的渲染透明度
+		 * @param parentFilter 父对象是否带滤镜，如果父对象带滤镜，滤镜渲染时，等候父对象的滤镜渲染时再渲染到缓冲区
+		 * 
+		 */		
+		public function addToRenderList(parentMatrix:Matrix,parentAlpha:Number,parentFilter:Boolean):void
+		{
+			if(!hasVisibleArea)return;
+			if(filters&&filters.length>0)
+			{
+				TurkeyRenderer.preFilter();
+			}
+			var matrix:Matrix = parentMatrix.clone();
+			MatrixUtil.prependMatrix(matrix,transformationMatrix);
+			TurkeyRenderer.addChildForRender(this,matrix,parentAlpha*alpha);
+			if(filters&&filters.length>0)
+			{
+				TurkeyRenderer.render();
+				for(var i:int=0;i<filters.length;i++)
+				{
+					filters[i].render((i==filters.length-1&&!parentFilter));
+				}
+				TurkeyRenderer.endFilter();
 			}
 		}
 	}
