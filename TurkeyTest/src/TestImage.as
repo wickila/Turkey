@@ -36,24 +36,24 @@ package
 			addChild(debug);
 			_loader = new Loader();
 			_loader.contentLoaderInfo.addEventListener(Event.COMPLETE,onTextureComplete);
-			_loader.load(new URLRequest("image.png"));
+			_loader.load(new URLRequest("images.jpg"));
 		}
 		
 		protected function onTextureComplete(event:Event):void
 		{
+			var filter:RadialBlurFilter = new RadialBlurFilter(.5,.5,.005);
+			var grayFilter:GrayFilter = new GrayFilter();
+			var blurFilter:BlurFilter = new BlurFilter(3,3);
 			var img:Image = new Image(Texture.fromBitmap(Bitmap(_loader.content)));
 			var img2:Image = new Image(Texture.fromBitmap(Bitmap(_loader.content)));
 			img2.x = img2.y = 300;
-			var filter:RadialBlurFilter = new RadialBlurFilter(.5,.5,.005);
-			var grayFilter:GrayFilter = new GrayFilter();
-//			img.filters = [filter];
-//			img.filters = [new BlurFilter(3,3)];
-//			img.filters = [grayFilter];
+			img2.filters = [blurFilter];
+			img.filters = [filter];
 			var sp:turkey.display.Sprite = new turkey.display.Sprite();
 			sp.mouseEnabled = false;
 			sp.addChild(img);
 			sp.addChild(img2);
-			sp.filters = [grayFilter];
+//			sp.filters = [grayFilter];
 			img.addEventListener(TurkeyMouseEvent.CLICK,onClick);
 			sp.addEventListener(TurkeyMouseEvent.CLICK,onClick);
 			stage.addEventListener(MouseEvent.CLICK,onStageClick);

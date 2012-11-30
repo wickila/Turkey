@@ -122,7 +122,7 @@ package turkey.display
 			broadcastEvent(mEnterFrameEvent);
 			
 			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
-			addToRenderList(_transformationMatrix,1);
+			addToRenderList(_transformationMatrix,1,false);
 			TurkeyRenderer.render();
 			context3D.present();
 			

@@ -22,10 +22,10 @@ package turkey.filters
 		}
 		/**
 		 *	进行滤镜渲染（从临时材质渲染到屏幕） 
-		 * @param isLast 是否是显示对象的最后一个滤镜（如果是就渲染到缓冲区，不是就渲染到临时材质）
+		 * @param isLast 是否立即渲染到缓冲区
 		 * 
 		 */		
-		public function render(isLast:Boolean=true):void
+		public function render(renderToBuff:Boolean=true):void
 		{
 			
 		}

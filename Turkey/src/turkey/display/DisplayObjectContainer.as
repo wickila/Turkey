@@ -251,7 +251,7 @@ package turkey.display
 			}
 		}
 		
-		override public function addToRenderList(parentMatrix:Matrix,parentAlpha:Number):void
+		override public function addToRenderList(parentMatrix:Matrix,parentAlpha:Number,parentFilter:Boolean):void
 		{
 			if(!hasVisibleArea)return;
 			if(filters&&filters.length)
@@ -263,14 +263,14 @@ package turkey.display
 				var child:DisplayObject = getChildAt(i);
 				var matrix:Matrix = parentMatrix.clone();
 				MatrixUtil.prependMatrix(matrix,transformationMatrix);
-				child.addToRenderList(matrix,parentAlpha*alpha);
+				child.addToRenderList(matrix,parentAlpha*alpha,(filters&&filters.length>0));
 			}
 			if(filters&&filters.length)
 			{
 				TurkeyRenderer.render();
 				for(i=0;i<filters.length;i++)
 				{
-					filters[i].render(i==filters.length-1);
+					filters[i].render(i==filters.length-1&&!parentFilter);
 				}
 				TurkeyRenderer.endFilter();
 			}

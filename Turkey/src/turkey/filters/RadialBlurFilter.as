@@ -87,7 +87,7 @@ package turkey.filters
 			}
 		}
 		
-		override public function render(isLast:Boolean=true):void
+		override public function render(renderToBuff:Boolean=true):void
 		{
 			var context3D:Context3D = Turkey.stage.context3D;
 			context3D.setProgram(_program);
@@ -97,7 +97,7 @@ package turkey.filters
 			context3D.setVertexBufferAt(2,null);
 			context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT,0,_constParam);
 			context3D.setProgramConstantsFromMatrix(Context3DProgramType.FRAGMENT,1,_scaleMatrix,true);
-			if(isLast)
+			if(renderToBuff)
 			{
 				context3D.setRenderToBackBuffer();
 			}else

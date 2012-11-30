@@ -567,9 +567,10 @@ package turkey.display
 		 *	加入到渲染队列当中，如果有滤镜，则添加进渲染队列，并且渲染(因为如果有子对象，可以一次画完以后，再一次运用滤镜，而不必对每个子对象都分别运用滤镜，可以提高效率)
 		 * @param parentMatrix 父对象的二维空间矩阵
 		 * @param parentAlpha 父对象的渲染透明度
+		 * @param parentFilter 父对象是否带滤镜，如果父对象带滤镜，滤镜渲染时，等候父对象的滤镜渲染时再渲染到缓冲区
 		 * 
 		 */		
-		public function addToRenderList(parentMatrix:Matrix,parentAlpha:Number):void
+		public function addToRenderList(parentMatrix:Matrix,parentAlpha:Number,parentFilter:Boolean):void
 		{
 			if(!hasVisibleArea)return;
 			if(filters&&filters.length>0)
@@ -584,7 +585,7 @@ package turkey.display
 				TurkeyRenderer.render();
 				for(var i:int=0;i<filters.length;i++)
 				{
-					filters[i].render(i==filters.length-1);
+					filters[i].render((i==filters.length-1&&!parentFilter));
 				}
 				TurkeyRenderer.endFilter();
 			}

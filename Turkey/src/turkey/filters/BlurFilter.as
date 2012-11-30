@@ -51,7 +51,7 @@ package turkey.filters
 			this.blurY = blurY; 
 		}
 		
-		override public function render(isLast:Boolean=true):void
+		override public function render(renderToBuff:Boolean=true):void
 		{
 			var context3D:Context3D = Turkey.stage.context3D;
 			context3D.setProgram(_program);
@@ -67,7 +67,7 @@ package turkey.filters
 			context3D.drawTriangles(_indexBuffer);
 			context3D.setTextureAt(0,Turkey.sceneTexture);
 			context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _paramsV, 3);
-			if(isLast)
+			if(renderToBuff)
 			{
 				context3D.setRenderToBackBuffer();
 			}else

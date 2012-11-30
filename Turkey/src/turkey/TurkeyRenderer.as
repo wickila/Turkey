@@ -41,7 +41,6 @@ package turkey
 		{
 			if(_renderNum<1)return;
 			rebuildBuffer();
-			Turkey.stage.context3D.setProgram(Turkey.getProgram(Image.IMAGE_PROGRAM));
 			drawTriangles();
 			reset();
 		}
@@ -67,14 +66,16 @@ package turkey
 		
 		private static function drawTriangles():void
 		{
+			var context3D:Context3D = Turkey.stage.context3D;
+			context3D.setProgram(Turkey.getProgram(Image.IMAGE_PROGRAM));
+			context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, Turkey.stage.flashMatrix, true);
 			for(_renderIndex=0;_renderIndex<_renderNum;_renderIndex++)
 			{
 				var displayObj:DisplayObject = _displayObjects[_renderIndex];
-				Turkey.stage.context3D.setTextureAt(0, displayObj.texture.base);
+				context3D.setTextureAt(0, displayObj.texture.base);
 				var arr:Array = BlendMode.getBlendFactors(displayObj.blendMode);
-				Turkey.stage.context3D.setBlendFactors(arr[0],arr[1]);
-				Turkey.stage.context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, Turkey.stage.flashMatrix, true);
-				Turkey.stage.context3D.drawTriangles(_indexBuffer,_renderIndex*6,2);
+				context3D.setBlendFactors(arr[0],arr[1]);
+				context3D.drawTriangles(_indexBuffer,_renderIndex*6,2);
 			}
 		}
 		
