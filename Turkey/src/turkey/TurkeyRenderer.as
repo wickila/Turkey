@@ -1,8 +1,6 @@
 package turkey
 {
-	import com.adobe.utils.AGALMiniAssembler;
-	
-	import flash.display3D.Context3DCompareMode;
+	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.IndexBuffer3D;
@@ -12,57 +10,68 @@ package turkey
 	
 	import turkey.core.Turkey;
 	import turkey.display.DisplayObject;
-	import turkey.display.DisplayObjectContainer;
 	import turkey.display.Image;
-	import turkey.display.Stage;
 	import turkey.enumrate.BlendMode;
-	import turkey.utils.MatrixUtil;
 	import turkey.utils.VertexData;
 
 	public class TurkeyRenderer
 	{
-		private static var _displayObjects:Vector.<DisplayObject>;
-		private static var _matrices:Vector.<Matrix>;
-		private static var _alhpas:Vector.<Number>;
-		private static var _vertices:Vector.<Number>;
+		private static var _displayObjects:Vector.<DisplayObject>=new Vector.<DisplayObject>();
+		private static var _matrices:Vector.<Matrix> = new Vector.<Matrix>();
+		private static var _alhpas:Vector.<Number> = new Vector.<Number>();
+		private static var _vertices:Vector.<Number> = new Vector.<Number>();
 		private static var _vertexbuffer:VertexBuffer3D;
 		private static var _vertexData:VertexData;
-		private static var _indices:Vector.<uint>;
+		private static var _indices:Vector.<uint> = new Vector.<uint>();
 		private static var _indexBuffer:IndexBuffer3D;
 		private static var _program:Program3D;
 		
-		private static var _renderNum:uint;
-		private static var _renderIndex:uint;
+		private static var _renderNum:uint=0;
+		private static var _renderIndex:uint=0;
 		
 		public function TurkeyRenderer()
 		{
 			
 		}
 		/**
-		 *	渲染某个对象 
-		 * @param child
-		 * @param parentMatrix
-		 * @param parentAlpha
+		 *	将渲染队列渲染到依次渲染,然后清空渲染队列,重置渲染数据
 		 * 
 		 */		
-		public static function render(child:DisplayObject,parentMatrix:Matrix,parentAlpha:Number=1):void
+		public static function render():void
 		{
-			Turkey.stage.clear();
-			reset();
-			addChildForRender(child,parentMatrix,parentAlpha);
 			if(_renderNum<1)return;
 			rebuildBuffer();
 			Turkey.stage.context3D.setProgram(Turkey.getProgram(Image.IMAGE_PROGRAM));
 			drawTriangles();
-			Turkey.stage.context3D.present();
+			reset();
+		}
+		
+		/**
+		 *	准备进行滤镜渲染，详情见http://jacksondunstan.com/articles/1998，译文地址：http://bbs.9ria.com/thread-156067-1-1.html 
+		 * 
+		 */		
+		public static function preFilter():void
+		{
+			render();
+			Turkey.stage.context3D.setRenderToTexture(Turkey.sceneTexture, false);
+			Turkey.stage.context3D.clear(0,0,0,0);//此处一定要清屏为0,0,0,0，不能是默认的舞台颜色
+		}
+		/**
+		 *	滤镜渲染完毕，重新设置回正常渲染模式 
+		 * 
+		 */		
+		public static function endFilter():void
+		{
+			Turkey.stage.context3D.setProgram(Turkey.getProgram(Image.IMAGE_PROGRAM));
 		}
 		
 		private static function drawTriangles():void
 		{
 			for(_renderIndex=0;_renderIndex<_renderNum;_renderIndex++)
 			{
-				Turkey.stage.context3D.setTextureAt(0, _displayObjects[_renderIndex].texture.base);
-				var arr:Array = BlendMode.getBlendFactors(_displayObjects[_renderIndex].blendMode);
+				var displayObj:DisplayObject = _displayObjects[_renderIndex];
+				Turkey.stage.context3D.setTextureAt(0, displayObj.texture.base);
+				var arr:Array = BlendMode.getBlendFactors(displayObj.blendMode);
 				Turkey.stage.context3D.setBlendFactors(arr[0],arr[1]);
 				Turkey.stage.context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, Turkey.stage.flashMatrix, true);
 				Turkey.stage.context3D.drawTriangles(_indexBuffer,_renderIndex*6,2);
@@ -75,6 +84,7 @@ package turkey
 		 */		
 		private static function rebuildBuffer():void
 		{
+			var context3D:Context3D = Turkey.stage.context3D;
 			_vertexbuffer && _vertexbuffer.dispose();
 			_indexBuffer && _indexBuffer.dispose();
 			_vertexData = new VertexData(_renderNum * 4);
@@ -88,14 +98,14 @@ package turkey
 				_vertexData.setAlpha(i*4+3,_alhpas[i]);
 				_indices.push(i*4,i*4+1,i*4+2,i*4+1,i*4+3,i*4+2);
 			}
-			_vertexbuffer = Turkey.stage.context3D.createVertexBuffer(_renderNum * 4,VertexData.ELEMENTS_PER_VERTEX);
-			_indexBuffer = Turkey.stage.context3D.createIndexBuffer(_indices.length);
+			_vertexbuffer = context3D.createVertexBuffer(_renderNum * 4,VertexData.ELEMENTS_PER_VERTEX);
+			_indexBuffer = context3D.createIndexBuffer(_indices.length);
 			
 			_vertexbuffer.uploadFromVector(_vertexData.rawData,0,_renderNum * 4);
 			_indexBuffer.uploadFromVector(_indices,0,_indices.length);
-			Turkey.stage.context3D.setVertexBufferAt(0, _vertexbuffer, VertexData.POSITION_OFFSET, Context3DVertexBufferFormat.FLOAT_2); 
-			Turkey.stage.context3D.setVertexBufferAt(1, _vertexbuffer, VertexData.COLOR_OFFSET, Context3DVertexBufferFormat.FLOAT_4);
-			Turkey.stage.context3D.setVertexBufferAt(2, _vertexbuffer, VertexData.TEXCOORD_OFFSET, Context3DVertexBufferFormat.FLOAT_2);
+			context3D.setVertexBufferAt(0, _vertexbuffer, VertexData.POSITION_OFFSET, Context3DVertexBufferFormat.FLOAT_2); 
+			context3D.setVertexBufferAt(1, _vertexbuffer, VertexData.COLOR_OFFSET, Context3DVertexBufferFormat.FLOAT_4);
+			context3D.setVertexBufferAt(2, _vertexbuffer, VertexData.TEXCOORD_OFFSET, Context3DVertexBufferFormat.FLOAT_2);
 		}
 		/**
 		 *	加入到渲染队列中 
@@ -104,30 +114,14 @@ package turkey
 		 * @param parentAlpha
 		 * 
 		 */		
-		private static function addChildForRender(child:DisplayObject,parentMatrix:Matrix,parentAlpha:Number):void
+		public static function addChildForRender(child:DisplayObject,matrix:Matrix,alpha:Number):void
 		{
-			var alpha:Number = child.alpha*parentAlpha;
-			var matrix:Matrix = parentMatrix.clone();
-			if(child.hasVisibleArea)
-			{
-				if(child is DisplayObjectContainer)
-				{
-					var numChildren:uint = DisplayObjectContainer(child).numChildren;
-					for(var i:int;i<numChildren;i++)
-					{
-						var newMatrix:Matrix = matrix.clone();
-						MatrixUtil.prependMatrix(newMatrix,DisplayObjectContainer(child).getChildAt(i).transformationMatrix);
-						addChildForRender(DisplayObjectContainer(child).getChildAt(i),newMatrix,alpha)
-					}
-				}else
-				{
-					_displayObjects.push(child);
-					_matrices.push(matrix);
-					_alhpas.push(alpha);
-					_renderNum ++;
-				}
-			}
+			_displayObjects.push(child);
+			_matrices.push(matrix);
+			_alhpas.push(alpha);
+			_renderNum ++;
 		}
+		
 		/**
 		 *	重置渲染数据 
 		 * 

@@ -4,19 +4,25 @@ package turkey.core
 	
 	import flash.display.Stage;
 	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.Program3D;
+	import flash.display3D.textures.TextureBase;
 	import flash.utils.Dictionary;
 	
 	import turkey.display.Image;
 	import turkey.display.Stage;
 	import turkey.events.EventDispatcher;
 	import turkey.events.TurkeyEvent;
+	import turkey.utils.TurkeyUtils;
 
 	use namespace turkey_internal;
 	public class Turkey extends EventDispatcher
 	{
 		public static var stage:turkey.display.Stage;
 		private static var _programs:Dictionary;
+		private static var _sceneTexture:TextureBase;
+		private static var _sceneTexture1:TextureBase;
+		private static var _sceneTexture2:TextureBase;
 		public function Turkey()
 		{
 		}
@@ -27,9 +33,38 @@ package turkey.core
 			stage.addEventListener(TurkeyEvent.CONTEXT3D_CREATE,onStageInit);
 		}
 		
+		public static function get sceneTexture():TextureBase
+		{
+			return _sceneTexture;
+		}
+		
+		public static function swapSceneTexture():void
+		{
+			if(_sceneTexture == _sceneTexture1)
+			{
+				_sceneTexture = _sceneTexture2;
+			}else
+			{
+				_sceneTexture = _sceneTexture1;
+			}
+		}
+		
 		private static function onStageInit(event:TurkeyEvent):void
 		{
 			initPrograms();
+			_sceneTexture1 = stage.context3D.createTexture(
+				TurkeyUtils.getNextPowerOfTwo(stage.stageWidth),
+				TurkeyUtils.getNextPowerOfTwo(stage.stageHeight),
+				Context3DTextureFormat.BGRA,
+				true
+			);
+			_sceneTexture2 = stage.context3D.createTexture(
+				TurkeyUtils.getNextPowerOfTwo(stage.stageWidth),
+				TurkeyUtils.getNextPowerOfTwo(stage.stageHeight),
+				Context3DTextureFormat.BGRA,
+				true
+			);
+			_sceneTexture = _sceneTexture1;
 			stage.dispatchEvent(new TurkeyEvent(TurkeyEvent.COMPLETE));
 		}
 		

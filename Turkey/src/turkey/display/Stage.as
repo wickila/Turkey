@@ -4,6 +4,10 @@ package turkey.display
     import flash.display.Stage3D;
     import flash.display3D.Context3D;
     import flash.display3D.Context3DCompareMode;
+    import flash.display3D.IndexBuffer3D;
+    import flash.display3D.Program3D;
+    import flash.display3D.VertexBuffer3D;
+    import flash.display3D.textures.Texture;
     import flash.errors.IllegalOperationError;
     import flash.events.MouseEvent;
     import flash.events.TimerEvent;
@@ -41,6 +45,10 @@ package turkey.display
 		private static var _bColorR:uint;
 		private static var _bColorG:uint;
 		private static var _bColorB:uint;
+		private var sceneTexture:Texture;
+		private var grayscaleProgram:Program3D;
+		private var postFilterVertexBuffer:VertexBuffer3D;
+		private var postFilterIndexBuffer:IndexBuffer3D;
         
         public function Stage(stage:flash.display.Stage, frameRate:int=60,color:uint=0)
         {
@@ -112,8 +120,13 @@ package turkey.display
 			mEnterFrameEvent.reset(TurkeyEvent.ENTER_FRAME, false, getTimer()-_time);
 			_time = getTimer();
 			broadcastEvent(mEnterFrameEvent);
+			
+			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
+			addToRenderList(_transformationMatrix,1);
+			TurkeyRenderer.render();
+			context3D.present();
+			
 			updateMouseState();
-			render();
 		}
 		
 		private function updateMouseState():void
@@ -122,16 +135,6 @@ package turkey.display
 			{
 				child.hitMouse(stage2D.mouseX,stage2D.mouseY);
 			}
-		}
-		
-		private function render():void
-		{
-			TurkeyRenderer.render(this,trasformMatix,1);
-		}
-		
-		public function clear():void
-		{
-			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
 		}
 		
 		private function onStageClick(event:MouseEvent):void

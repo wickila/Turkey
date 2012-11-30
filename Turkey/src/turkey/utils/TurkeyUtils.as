@@ -17,5 +17,13 @@ package turkey.utils
 				return result;
 			}
 		}
+		
+		public static function combineArray(arr1:Array,arr2:Array):Array
+		{
+			if(arr1==null&&arr2==null)return null;
+			var result:Array = arr1 == null?null:arr1.concat();
+			result = arr2 == null?result:(result==null?arr2.concat():arr2.concat(result));
+			return result;
+		}
 	}
 }
