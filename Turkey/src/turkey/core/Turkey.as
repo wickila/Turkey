@@ -27,9 +27,9 @@ package turkey.core
 		{
 		}
 		
-		public static function init(stage2D:flash.display.Stage,frameRate:int=60,color:uint=0xffffffff):void
+		public static function init(stage2D:flash.display.Stage,stageWidth:Number=0,stageHeight:Number=0,frameRate:int=60,color:uint=0xffffffff):void
 		{
-			stage = new turkey.display.Stage(stage2D,frameRate,color);
+			stage = new turkey.display.Stage(stage2D,stageWidth,stageHeight,frameRate,color);
 			stage.addEventListener(TurkeyEvent.CONTEXT3D_CREATE,onStageInit);
 		}
 		

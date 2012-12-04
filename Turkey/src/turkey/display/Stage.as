@@ -50,11 +50,13 @@ package turkey.display
 		private var postFilterVertexBuffer:VertexBuffer3D;
 		private var postFilterIndexBuffer:IndexBuffer3D;
         
-        public function Stage(stage:flash.display.Stage, frameRate:int=60,color:uint=0)
+        public function Stage(stage:flash.display.Stage,stageWidth:Number=0,stageHeight:Number=0, frameRate:int=60,color:uint=0)
         {
 			stage2D = stage;
-            stageWidth = stage.stageWidth;
-            stageHeight = stage.stageHeight;
+            if(stageWidth ==0)stageWidth = stage.stageWidth;
+            if(stageHeight==0)stageHeight = stage.stageHeight;
+			this.stageWidth = stageWidth;
+			this.stageHeight = stageHeight;
 			trasformMatix = new Matrix();
             _color = color;
 			_bColorA = (_color & 0xff000000)/0xff;
@@ -141,6 +143,7 @@ package turkey.display
 		{
 			var p:Point = new Point(event.stageX,event.stageY);
 			var target:DisplayObject = hitTest(p,true);
+			if(target == null)return;
 			target.globalToLocal(new Point(event.stageX,event.stageY),p);
 			target.dispatchEvent(getEventByType(event.type,target,p,event.stageX,event.stageY));
 		}
@@ -169,6 +172,7 @@ package turkey.display
 		{
 			var p:Point = new Point(event.stageX,event.stageY);
 			var target:DisplayObject = hitTest(p,true);
+			if(target == null)return;
 			target.globalToLocal(new Point(event.stageX,event.stageY),p);
 			target.dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_MOVE,target,p.x,p.y,event.stageX,event.stageY));
 		}

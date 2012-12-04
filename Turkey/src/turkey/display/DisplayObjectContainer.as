@@ -225,7 +225,7 @@ package turkey.display
 				{
 					for (var j:int=numChildren-1; j>=0; --j) // front to back!
 					{
-						var child1:DisplayObject = _children[i];
+						var child1:DisplayObject = _children[j];
 						getTransformationMatrix(child1, sHelperMatrix);
 						
 						MatrixUtil.transformCoords(sHelperMatrix, localX, localY, sHelperPoint);
