@@ -9,6 +9,7 @@ package turkey.display
 	import flash.utils.getQualifiedClassName;
 	
 	import turkey.TurkeyRenderer;
+	import turkey.core.Turkey;
 	import turkey.enumrate.BlendMode;
 	import turkey.errors.AbstractClassError;
 	import turkey.errors.AbstractMethodError;
@@ -589,6 +590,31 @@ package turkey.display
 				}
 				TurkeyRenderer.endFilter();
 			}
+		}
+		
+		private var _dragHelpPoint:Point;
+		private var _dragHelpPoint2:Point;
+		private var _dragHelpBoolean:Boolean;
+		public function dragStart():void
+		{
+			_dragHelpBoolean = Turkey.stage.mouseMoveEnable;
+			Turkey.stage.mouseMoveEnable = true;
+			_dragHelpPoint = new Point(Turkey.stage.mouseX,Turkey.stage.mouseY);
+			_dragHelpPoint2 = new Point(x,y);
+			Turkey.stage.addEventListener(TurkeyMouseEvent.MOUSE_MOVE,onMouseMove);
+		}
+		
+		private function onMouseMove(event:TurkeyMouseEvent):void
+		{
+			var p:Point = new Point(event.stageX,event.stageY);
+			x = _dragHelpPoint2.x + p.x - _dragHelpPoint.x;
+			y = _dragHelpPoint2.y + p.y - _dragHelpPoint.y;
+		}
+		
+		public function dragStop():void
+		{
+			Turkey.stage.mouseMoveEnable = _dragHelpBoolean;
+			Turkey.stage.removeEventListener(TurkeyMouseEvent.MOUSE_MOVE,onMouseMove);
 		}
 	}
 }

@@ -18,7 +18,7 @@ package
 	import turkey.filters.RadialBlurFilter;
 	import turkey.textures.Texture;
 	
-	[SWF(width="1000",height="600",frameRate="25")]
+	[SWF(width="1000",height="600",frameRate="60")]
 	public class TestImage extends flash.display.Sprite
 	{
 		private var _loader:Loader;
@@ -44,7 +44,9 @@ package
 			var filter:RadialBlurFilter = new RadialBlurFilter(.5,.5,.005);
 			var grayFilter:GrayFilter = new GrayFilter();
 			var blurFilter:BlurFilter = new BlurFilter(3,3);
-			var img:Image = new Image(Texture.fromBitmap(Bitmap(_loader.content)));
+			var texture:Texture = Texture.fromBitmap(Bitmap(_loader.content));
+			var img:Image = new Image(texture);
+			Turkey.stage.addChild(img);
 			var img2:Image = new Image(Texture.fromBitmap(Bitmap(_loader.content)));
 			img2.x = img2.y = 300;
 			img2.filters = [blurFilter];
@@ -55,6 +57,8 @@ package
 			sp.addChild(img2);
 //			sp.filters = [grayFilter];
 			img.addEventListener(TurkeyMouseEvent.CLICK,onClick);
+			img.addEventListener(TurkeyMouseEvent.MOUSE_DOWN,onMouseDown);
+			img.addEventListener(TurkeyMouseEvent.MOUSE_UP,onMouseUp);
 			sp.addEventListener(TurkeyMouseEvent.CLICK,onClick);
 			stage.addEventListener(MouseEvent.CLICK,onStageClick);
 			Turkey.stage.addChild(sp);
@@ -80,6 +84,16 @@ package
 			{
 				filter.xOffset = mouseX / stage.stageWidth;
 				filter.yOffset = mouseY / stage.stageHeight;
+			}
+			
+			function onMouseDown(event4:TurkeyMouseEvent):void
+			{
+				img.dragStart();
+			}
+			
+			function onMouseUp(event5:TurkeyMouseEvent):void
+			{
+				img.dragStop();
 			}
 		}
 	}

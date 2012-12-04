@@ -133,10 +133,7 @@ package turkey.display
 		
 		private function updateMouseState():void
 		{
-			for each(var child:DisplayObject in children)
-			{
-				child.hitMouse(stage2D.mouseX,stage2D.mouseY);
-			}
+			hitMouse(stage2D.mouseX,stage2D.mouseY);
 		}
 		
 		private function onStageClick(event:MouseEvent):void
@@ -172,7 +169,6 @@ package turkey.display
 		{
 			var p:Point = new Point(event.stageX,event.stageY);
 			var target:DisplayObject = hitTest(p,true);
-			if(target == null)return;
 			target.globalToLocal(new Point(event.stageX,event.stageY),p);
 			target.dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_MOVE,target,p.x,p.y,event.stageX,event.stageY));
 		}
