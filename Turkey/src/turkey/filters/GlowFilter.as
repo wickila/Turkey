@@ -8,7 +8,6 @@ package turkey.filters
 	import flash.display3D.textures.TextureBase;
 	
 	import turkey.core.Turkey;
-	import turkey.display.DisplayObject;
 	import turkey.utils.TurkeyUtils;
 
 	public class GlowFilter extends BlurFilter
@@ -22,9 +21,9 @@ package turkey.filters
 		public function GlowFilter(color:uint,blurX:Number=1, blurY:Number=1)
 		{
 			super(blurX, blurY);
-			colorVector[0] = (color & 0xff000000)/0xff;
-			colorVector[1] = (color & 0xff0000)/0xff;
-			colorVector[2] = (color & 0xff00)/0xff;
+			colorVector[0] = ((uint(color>>16) & 0xff))/0xff;
+			colorVector[1] = ((uint(color>>8) & 0xff))/0xff;
+			colorVector[2] = ((uint(color) & 0xff))/0xff;
 		}
 		
 		override public function render(renderToBuff:Boolean=true):void
@@ -33,13 +32,8 @@ package turkey.filters
 			context3D.setVertexBufferAt (0, _vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
 			context3D.setVertexBufferAt(1, null);
 			context3D.setVertexBufferAt(2,_vertexBuffer, 6, Context3DVertexBufferFormat.FLOAT_2);
-			context3D.setProgram(_copyProgram);
 			context3D.setTextureAt(0,Turkey.sceneTexture);
 			context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 4, Turkey.stage.flashMatrix, true);
-			context3D.setRenderToTexture(tempTexture);
-			context3D.clear(0,0,0,0);
-			context3D.drawTriangles(_indexBuffer);
-			
 			context3D.setProgram(_glowProgram);
 			context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 3, colorVector);
 			context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _paramsH, 3);
@@ -50,15 +44,15 @@ package turkey.filters
 			
 			context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _paramsV, 3);
 			context3D.setTextureAt(0,Turkey.sceneTexture);
-			Turkey.swapSceneTexture();
-			context3D.setRenderToTexture(Turkey.sceneTexture);
+			context3D.setRenderToTexture(tempTexture);
 			context3D.clear(0,0,0,0);
 			context3D.drawTriangles(_indexBuffer);
 			
 			context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, GlowFilter_CONSTANTS);
 			context3D.setProgram(_addProgram);
-			context3D.setTextureAt(0,Turkey.sceneTexture);
-			context3D.setTextureAt(1,tempTexture);
+			Turkey.swapSceneTexture();
+			context3D.setTextureAt(1,Turkey.sceneTexture);
+			context3D.setTextureAt(0,tempTexture);
 			if(renderToBuff)
 			{
 				context3D.setRenderToBackBuffer();

@@ -37,7 +37,7 @@ package
 			addChild(debug);
 			_loader = new Loader();
 			_loader.contentLoaderInfo.addEventListener(Event.COMPLETE,onTextureComplete);
-			_loader.load(new URLRequest("images.jpg"));
+			_loader.load(new URLRequest("image.png"));
 		}
 		
 		protected function onTextureComplete(event:Event):void
@@ -45,7 +45,7 @@ package
 			var filter:RadialBlurFilter = new RadialBlurFilter(.5,.5,.005);
 			var grayFilter:GrayFilter = new GrayFilter();
 			var blurFilter:BlurFilter = new BlurFilter(3,3);
-			var glowFilter:GlowFilter = new GlowFilter(0x0000ffff,2,2);
+			var glowFilter:GlowFilter = new GlowFilter(0xffff00,2,2);
 			var texture:Texture = Texture.fromBitmap(Bitmap(_loader.content));
 			var img:Image = new Image(texture);
 			var img2:Image = new Image(Texture.fromBitmap(Bitmap(_loader.content)));
