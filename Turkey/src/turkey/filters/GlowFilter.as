@@ -2,71 +2,63 @@ package turkey.filters
 {
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.Context3DVertexBufferFormat;
-	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.Program3D;
-	import flash.display3D.VertexBuffer3D;
+	import flash.display3D.textures.TextureBase;
 	
 	import turkey.core.Turkey;
+	import turkey.display.DisplayObject;
 	import turkey.utils.TurkeyUtils;
 
-	public class BlurFilter extends FragmentFilter
+	public class GlowFilter extends BlurFilter
 	{
-		protected static const GAUSSIAN_SAMPLES:int = 9;
-		
-		protected var _gaussians:Vector.<Number> = new <Number>[0.05, 0.09, 0.12, 0.15, 0.18, 0.15, 0.12, 0.09, 0.05];
-		protected var _paramsH:Vector.<Number>;
-		protected var _paramsV:Vector.<Number>;
-		protected var _invW:Number;
-		protected var _invH:Number;
-		protected var _blurX:Number = 0.5;
-		protected var _blurY:Number = 0.5;
-		
-		private static var _program:Program3D;
-		protected static var _vertexBuffer:VertexBuffer3D;
-		protected static var _indexBuffer:IndexBuffer3D;
-		
-		public function BlurFilter(blurX:Number=1, blurY:Number=1)
+		private var _glowProgram:Program3D = null;
+		private var _copyProgram:Program3D = null;
+		private var _addProgram:Program3D = null;
+		private var colorVector:Vector.<Number> = new <Number>[0, 0, 1, 1];
+		private static const GlowFilter_CONSTANTS:Vector.<Number> = new <Number>[1, 1, 1, 1];
+		private static var tempTexture:TextureBase;
+		public function GlowFilter(color:uint,blurX:Number=1, blurY:Number=1)
 		{
-			super();
-			_paramsH = new <Number>[];
-			_paramsH.length = 12;
-			// cut repeated values
-			for(var i:int = 0; i < GAUSSIAN_SAMPLES-4; ++i)
-			{
-				_paramsH[i+4] = _gaussians[i];
-			}
-			_invW = 1/TurkeyUtils.getNextPowerOfTwo(Turkey.stage.stageWidth);
-			this.blurX = blurX;
-			
-			_paramsV = new <Number>[];
-			_paramsV.length = 12;
-			// cut repeated values
-			for(i = 0; i < GAUSSIAN_SAMPLES-4; ++i)
-			{
-				_paramsV[i+4] = _gaussians[i];
-			}
-			_invH = 1/TurkeyUtils.getNextPowerOfTwo(Turkey.stage.stageHeight);
-			
-			this.blurY = blurY; 
+			super(blurX, blurY);
+			colorVector[0] = (color & 0xff000000)/0xff;
+			colorVector[1] = (color & 0xff0000)/0xff;
+			colorVector[2] = (color & 0xff00)/0xff;
 		}
 		
 		override public function render(renderToBuff:Boolean=true):void
 		{
 			var context3D:Context3D = Turkey.stage.context3D;
-			context3D.setProgram(_program);
 			context3D.setVertexBufferAt (0, _vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
-			context3D.setVertexBufferAt(1, _vertexBuffer, 6, Context3DVertexBufferFormat.FLOAT_2);
-			context3D.setVertexBufferAt(2,null);//filter不处理rgba的变换
+			context3D.setVertexBufferAt(1, null);
+			context3D.setVertexBufferAt(2,_vertexBuffer, 6, Context3DVertexBufferFormat.FLOAT_2);
+			context3D.setProgram(_copyProgram);
 			context3D.setTextureAt(0,Turkey.sceneTexture);
 			context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 4, Turkey.stage.flashMatrix, true);
+			context3D.setRenderToTexture(tempTexture);
+			context3D.clear(0,0,0,0);
+			context3D.drawTriangles(_indexBuffer);
+			
+			context3D.setProgram(_glowProgram);
+			context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 3, colorVector);
 			context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _paramsH, 3);
 			Turkey.swapSceneTexture();
 			context3D.setRenderToTexture(Turkey.sceneTexture);
 			context3D.clear(0,0,0,0);
 			context3D.drawTriangles(_indexBuffer);
-			context3D.setTextureAt(0,Turkey.sceneTexture);
+			
 			context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _paramsV, 3);
+			context3D.setTextureAt(0,Turkey.sceneTexture);
+			Turkey.swapSceneTexture();
+			context3D.setRenderToTexture(Turkey.sceneTexture);
+			context3D.clear(0,0,0,0);
+			context3D.drawTriangles(_indexBuffer);
+			
+			context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, GlowFilter_CONSTANTS);
+			context3D.setProgram(_addProgram);
+			context3D.setTextureAt(0,Turkey.sceneTexture);
+			context3D.setTextureAt(1,tempTexture);
 			if(renderToBuff)
 			{
 				context3D.setRenderToBackBuffer();
@@ -77,11 +69,12 @@ package turkey.filters
 				context3D.clear(0,0,0,0);
 			}
 			context3D.drawTriangles(_indexBuffer);
+			context3D.setTextureAt(1,null);
 		}
 		
 		override protected function createProgram():void
 		{
-			if(_program == null)
+			if(_glowProgram == null)
 			{
 				var fragmentCode:String;
 				
@@ -116,11 +109,20 @@ package turkey.filters
 				
 				fragmentCode +=             "tex ft2, ft0, fs0 <2d,linear,mipnone,clamp>    \n" +
 					"mul ft2, ft2, " + _gauss_regs[8] + "   \n" +
-					"add oc, ft1, ft2                               \n";
+					"add ft2, ft1, ft2\n"+
+					"mul ft2, ft2.w, fc3\n" +
+					"mov oc, ft2                               \n";
 				
 				var vertexProgramCode:String = "m44 op, va0, vc4\n" +//v4-v7为空间转屏幕坐标
-					"mov v0 va1\n";
-				_program = assembleAgal(fragmentCode, vertexProgramCode);
+					"mov v0 va2\n";
+				_glowProgram = assembleAgal(fragmentCode, vertexProgramCode);
+				_copyProgram = assembleAgal("tex ft1, v0, fs0 <2d,linear,nomip>\n" +
+					"mov oc, ft1", vertexProgramCode);
+				_addProgram = assembleAgal("tex ft1, v0, fs0 <2d,linear,nomip>\n" +
+					"tex ft2, v0, fs1 <2d,linear,nomip>\n" +
+					"sub ft3.w, fc0.w, ft2.w\n"+
+					"mul ft1.xyz, ft3.w, ft1.xyz\n" +
+					"add oc, ft2, ft1\n", vertexProgramCode);
 				_vertexBuffer = Turkey.stage.context3D.createVertexBuffer(4, 8);
 				var w:Number = Turkey.stage.stageWidth;
 				var h:Number = Turkey.stage.stageHeight;
@@ -132,24 +134,13 @@ package turkey.filters
 				]), 0, 4);
 				_indexBuffer = Turkey.stage.context3D.createIndexBuffer(6);
 				_indexBuffer.uploadFromVector(INDEX_VECTOR, 0, 6);
+				tempTexture = Turkey.stage.context3D.createTexture(
+					TurkeyUtils.getNextPowerOfTwo(Turkey.stage.stageWidth),
+					TurkeyUtils.getNextPowerOfTwo(Turkey.stage.stageHeight),
+					Context3DTextureFormat.BGRA,
+					true
+				);
 			}
 		}
-		
-		public function get blurX():Number { return _blurX; }
-		public function set blurX(value:Number):void
-		{
-			_blurX = value;
-			_paramsH[0] = _invW * _blurX * 4.;
-			_paramsH[2] = _invW * _blurX;
-		}
-		
-		public function get blurY():Number { return _blurY; }
-		public function set blurY(value:Number):void
-		{
-			_blurY = value;
-			_paramsV[1] = _invH * _blurY * 4.;
-			_paramsV[3] = _invH * _blurY;
-		}
-		
 	}
 }

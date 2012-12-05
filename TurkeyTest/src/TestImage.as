@@ -14,6 +14,7 @@ package
 	import turkey.events.TurkeyEvent;
 	import turkey.events.TurkeyMouseEvent;
 	import turkey.filters.BlurFilter;
+	import turkey.filters.GlowFilter;
 	import turkey.filters.GrayFilter;
 	import turkey.filters.RadialBlurFilter;
 	import turkey.textures.Texture;
@@ -44,12 +45,12 @@ package
 			var filter:RadialBlurFilter = new RadialBlurFilter(.5,.5,.005);
 			var grayFilter:GrayFilter = new GrayFilter();
 			var blurFilter:BlurFilter = new BlurFilter(3,3);
+			var glowFilter:GlowFilter = new GlowFilter(0x0000ffff,2,2);
 			var texture:Texture = Texture.fromBitmap(Bitmap(_loader.content));
 			var img:Image = new Image(texture);
-			Turkey.stage.addChild(img);
 			var img2:Image = new Image(Texture.fromBitmap(Bitmap(_loader.content)));
 			img2.x = img2.y = 300;
-			img2.filters = [blurFilter];
+			img2.filters = [glowFilter];
 			img.filters = [filter];
 			var sp:turkey.display.Sprite = new turkey.display.Sprite();
 			sp.mouseEnabled = false;

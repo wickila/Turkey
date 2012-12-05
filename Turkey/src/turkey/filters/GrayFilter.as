@@ -9,6 +9,7 @@ package turkey.filters
 	import flash.display3D.Program3D;
 	import flash.display3D.VertexBuffer3D;
 	import flash.utils.ByteArray;
+	
 	import turkey.core.Turkey;
 
 	public class GrayFilter extends FragmentFilter

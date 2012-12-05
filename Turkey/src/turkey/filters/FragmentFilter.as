@@ -22,7 +22,7 @@ package turkey.filters
 		}
 		/**
 		 *	进行滤镜渲染（从临时材质渲染到屏幕） 
-		 * @param isLast 是否立即渲染到缓冲区
+		 * @param renderToBuff 是否立即渲染到缓冲区
 		 * 
 		 */		
 		public function render(renderToBuff:Boolean=true):void
