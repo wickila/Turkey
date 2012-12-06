@@ -36,7 +36,7 @@ package
 		protected function onTextureComplete(event:Event):void
 		{
 			var texture:Texture = Texture.fromBitmap(Bitmap(_loader.content));
-			for(var i:int=0;i<2000;i++)
+			for(var i:int=0;i<1000;i++)
 			{
 				var img:Image = new Image(texture);
 				img.x = stage.stageWidth*Math.random();
