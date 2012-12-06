@@ -3,7 +3,6 @@ package turkey.display
     import flash.display.Stage;
     import flash.display.Stage3D;
     import flash.display3D.Context3D;
-    import flash.display3D.Context3DCompareMode;
     import flash.display3D.IndexBuffer3D;
     import flash.display3D.Program3D;
     import flash.display3D.VertexBuffer3D;
@@ -58,6 +57,7 @@ package turkey.display
 			this.stageWidth = stageWidth;
 			this.stageHeight = stageHeight;
 			trasformMatix = new Matrix();
+			_mouseEnabled = false;
             _color = color;
 			_bColorA = (_color & 0xff000000)/0xff;
 			_bColorR = (_color & 0xff0000)/0xff;
@@ -110,8 +110,7 @@ package turkey.display
 		{
 			context3D = stage3D.context3D;
 			context3D.enableErrorChecking = Capabilities.isDebugger;
-			context3D.setDepthTest(true,Context3DCompareMode.ALWAYS);
-			context3D.configureBackBuffer(stageWidth, stageHeight, 2, true);
+			context3D.configureBackBuffer(stageWidth, stageHeight, 0, false);
 			_timer.start();
 			_time = getTimer();
 			dispatchEvent(new TurkeyEvent(TurkeyEvent.CONTEXT3D_CREATE));
@@ -119,20 +118,15 @@ package turkey.display
 		
 		private function onTimer(event:TimerEvent):void
 		{
-			mEnterFrameEvent.reset(TurkeyEvent.ENTER_FRAME, false, getTimer()-_time);
-			_time = getTimer();
-			broadcastEvent(mEnterFrameEvent);
+//			mEnterFrameEvent.reset(TurkeyEvent.ENTER_FRAME, false, getTimer()-_time);
+//			_time = getTimer();
+//			broadcastEvent(mEnterFrameEvent);
 			
 			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
 			addToRenderList(_transformationMatrix,1,false);
 			TurkeyRenderer.render();
 			context3D.present();
 			
-			updateMouseState();
-		}
-		
-		private function updateMouseState():void
-		{
 			hitMouse(stage2D.mouseX,stage2D.mouseY);
 		}
 		
@@ -175,9 +169,6 @@ package turkey.display
 
         override public function hitTest(localPoint:Point,forMouse:Boolean=false):DisplayObject
         {
-			if(forMouse && (!visible||!mouseEnabled))
-                return null;
-            
             // locations outside of the stage area shouldn't be accepted
             if (localPoint.x < 0 || localPoint.x > stageWidth ||
                 localPoint.y < 0 || localPoint.y > stageHeight)

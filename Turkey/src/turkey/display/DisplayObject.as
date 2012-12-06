@@ -3,15 +3,12 @@ package turkey.display
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	import flash.system.Capabilities;
 	import flash.ui.Mouse;
 	import flash.ui.MouseCursor;
-	import flash.utils.getQualifiedClassName;
 	
 	import turkey.TurkeyRenderer;
 	import turkey.core.Turkey;
 	import turkey.enumrate.BlendMode;
-	import turkey.errors.AbstractClassError;
 	import turkey.errors.AbstractMethodError;
 	import turkey.events.EventDispatcher;
 	import turkey.events.TurkeyMouseEvent;
@@ -45,6 +42,7 @@ package turkey.display
 		protected var _transformationMatrix:Matrix;
 		protected var _pixelHit:Boolean=false;
 		private var _mouseOut:Boolean = true;
+		protected var _selfBounds:Rectangle = new Rectangle();
 		
 		protected var _vertexData:VertexData;
 		private static var sAncestors:Vector.<DisplayObject> = new <DisplayObject>[];
@@ -54,11 +52,6 @@ package turkey.display
 		
 		public function DisplayObject()
 		{
-			if (Capabilities.isDebugger && 
-				getQualifiedClassName(this) == "starling.display::DisplayObject")
-			{
-				throw new AbstractClassError();
-			}
 			_transformationMatrix = new Matrix();
 		}
 
@@ -197,6 +190,11 @@ package turkey.display
 		{
 			if(_mouseEnabled == value)return;
 			_mouseEnabled = value;
+			if(parent)
+			{
+				if(_mouseEnabled)parent.addToMouseHitList(this);
+				else parent.removeFromMouseHitList(this);
+			}
 			Mouse.cursor = (_mouseEnabled && _buttonMode && !_mouseOut) ? MouseCursor.BUTTON : MouseCursor.AUTO;
 		}
 		
@@ -295,10 +293,14 @@ package turkey.display
 //				ancestor = ancestor.parent;
 //			
 			if (ancestor == this)
+			{
 				throw new ArgumentError("An object cannot be added as a child to itself or one " +
 					"of its children (or children's children, etc.)");
-			else
+			}else
+			{
 				_parent = value; 
+				getBounds(this,_selfBounds);
+			}
 		}
 		
 		internal function removeFromParent():void
@@ -339,7 +341,7 @@ package turkey.display
 		 */		
 		public function hitTest(localPoint:Point,forMouse:Boolean = false):DisplayObject
 		{
-			return getBounds(this,sHelperRectangle).contains(localPoint.x,localPoint.y)?this:null;
+			return _selfBounds.contains(localPoint.x,localPoint.y)?this:null;
 		}
 		
 		public function get texture():Texture
@@ -490,6 +492,7 @@ package turkey.display
 					_transformationMatrix.ty = y - _transformationMatrix.b * _pivotX 
 						- _transformationMatrix.d * _pivotY;
 				}
+				getBounds(this,_selfBounds);
 				_matrixChanged = false;
 			}
 			return _transformationMatrix; 
@@ -556,9 +559,9 @@ package turkey.display
 		{
 			_stageMousePoint.setTo(stageX,stageY);
 			globalToLocal(_stageMousePoint,_localMousePoint);
-			if(mouseEnabled && hitTest(_localMousePoint,true))
+			if(_mouseEnabled)
 			{
-				mouseOut = false;
+				mouseOut = !hitTest(_localMousePoint,true);
 			}else
 			{
 				mouseOut = true;
@@ -573,15 +576,14 @@ package turkey.display
 		 */		
 		public function addToRenderList(parentMatrix:Matrix,parentAlpha:Number,parentFilter:Boolean):void
 		{
-			if(!hasVisibleArea)return;
-			if(filters&&filters.length>0)
+			var hasFilter:Boolean = filters && filters.length>0;
+			if(hasFilter)
 			{
 				TurkeyRenderer.preFilter();
 			}
-			var matrix:Matrix = parentMatrix.clone();
-			MatrixUtil.prependMatrix(matrix,transformationMatrix);
-			TurkeyRenderer.addChildForRender(this,matrix,parentAlpha*alpha);
-			if(filters&&filters.length>0)
+			parentMatrix.concat(transformationMatrix);
+			TurkeyRenderer.addChildForRender(this,parentMatrix,parentAlpha*alpha);
+			if(hasFilter)
 			{
 				TurkeyRenderer.render();
 				for(var i:int=0;i<filters.length;i++)

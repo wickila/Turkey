@@ -95,11 +95,6 @@ package turkey.textures
         /** @private */
         public function Texture(bitmapData:BitmapData)
         {
-            if (Capabilities.isDebugger && 
-                getQualifiedClassName(this) == "turkey.textures::Texture")
-            {
-                throw new AbstractClassError();
-            }
             _bitmapData = bitmapData;
 			_showRect = new Rectangle(0,0,bitmapData.width,bitmapData.height);
             mRepeat = false;

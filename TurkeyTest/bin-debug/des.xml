@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://texturepacker.com-->
+<!-- $TexturePacker:SmartUpdate:9f28461ccf51e5c8d73c4bbf2c0feaff$ -->
+<TextureAtlas imagePath="des.png">
+    <SubTexture name="bird" x="0" y="0" width="256" height="256"/>
+</TextureAtlas>

@@ -104,16 +104,6 @@ package turkey.display
             return _vertexData.getAlpha(vertexID);
         }
         
-        /** Sets the alpha value of a vertex at a certain index. */
-        public function setVertexAlpha(vertexID:int, alpha:Number):void
-        {
-            _vertexData.setAlpha(vertexID, alpha);
-            onVertexDataChanged();
-            
-            if (alpha != 1.0) mTinted = true;
-            else mTinted = _vertexData.tinted;
-        }
-        
         /** Returns the color of the quad, or of vertex 0 if vertices have different colors. */
         public function get color():uint 
         { 
@@ -135,9 +125,6 @@ package turkey.display
         {
             super.alpha = value;
 			_vertexData.setAlpha(0,value);
-			_vertexData.setAlpha(1,value);
-			_vertexData.setAlpha(2,value);
-			_vertexData.setAlpha(3,value);
             if (value < 1.0) mTinted = true;
             else mTinted = _vertexData.tinted;
         }

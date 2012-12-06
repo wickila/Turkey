@@ -26,6 +26,7 @@ package
 		{
 			Turkey.init(stage);
 			Turkey.stage.addEventListener(TurkeyEvent.COMPLETE,__createComplete);
+			addChild(new DebugStats());
 		}
 		
 		protected function __createComplete(event:TurkeyEvent):void
@@ -46,11 +47,7 @@ package
 		{
 			var textureBody:Texture = Texture.fromBitmapData(Bitmap(_loader.content).bitmapData);//动画材质
 			_textureAlas = new TextureAtlas(textureBody,new XML(_urlLoader.data));//动画解析文件
-			var img:Image = new Image(textureBody);
-			Turkey.stage.addChild(img);
-			img.pivotX = -100;
-			img.pivotY = -100;
-			var mc:MovieClip = new MovieClip(_textureAlas.getTextures("test222"));
+			var mc:MovieClip = new MovieClip(_textureAlas.getTextures("1005_stand"));
 			mc.addEventListener(TurkeyMouseEvent.CLICK,onClick);
 			mc.pivotX = 74;
 			mc.pivotY = 362;
@@ -58,13 +55,20 @@ package
 			mc.pixelHit = true;
 //			Turkey.stage.addChild(mc);
 			
-			mc = new MovieClip(_textureAlas.getTextures("test222"));
-			mc.addEventListener(TurkeyMouseEvent.CLICK,onClick);
-			mc.pivotX = 74;
-			mc.pivotY = 362;
-			mc.x = mc.y = 400;
-			mc.pixelHit = true;
-			Turkey.stage.addChild(mc);
+			for(var i:int = 0;i<1000;i++)
+			{
+				mc = new MovieClip(_textureAlas.getTextures("1005_stand"));
+				mc.addEventListener(TurkeyMouseEvent.CLICK,onClick);
+				//			mc.pivotX = 74;
+				//			mc.pivotY = 362;
+//				mc.buttonMode = true;
+				mc.mouseEnabled = false;
+				mc.stop();
+				mc.x = Math.random()*stage.stageWidth-300;
+				mc.y = Math.random()*stage.stageHeight-300;
+				mc.pixelHit = true;
+				Turkey.stage.addChild(mc);
+			}
 			
 			
 			function onClick(event:TurkeyMouseEvent):void

@@ -1,8 +1,10 @@
 package turkey.display
 {
+	import flash.events.Event;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	
-	import turkey.events.TurkeyEnterFrameEvent;
+	import turkey.core.Turkey;
 	import turkey.textures.Texture;
 	
 	public class MovieClip extends Image
@@ -26,10 +28,10 @@ package turkey.display
 
 		protected function initEvents():void
 		{
-			addEventListener(TurkeyEnterFrameEvent.ENTER_FRAME,onEnterFrame);
+			Turkey.stage.stage2D.addEventListener(Event.ENTER_FRAME,onEnterFrame);
 		}
 		
-		private function onEnterFrame(event:TurkeyEnterFrameEvent):void
+		private function onEnterFrame(event:Event):void
 		{
 			update();
 		}
@@ -63,20 +65,49 @@ package turkey.display
 		public function play():void
 		{
 			_playing = true;
-			addEventListener(TurkeyEnterFrameEvent.ENTER_FRAME,onEnterFrame);
+			Turkey.stage.stage2D.addEventListener(Event.ENTER_FRAME,onEnterFrame);
 		}
 		
 		public function puase():void
 		{
 			_playing = false;
-			removeEventListener(TurkeyEnterFrameEvent.ENTER_FRAME,onEnterFrame);
+			Turkey.stage.stage2D.removeEventListener(Event.ENTER_FRAME,onEnterFrame);
 		}
 		
 		override public function hitTest(localPoint:Point, forMouse:Boolean=false):DisplayObject
 		{
 				if (forMouse && (!visible||!mouseEnabled))return null;
 				if(!_pixelHit)return super.hitTest(localPoint,forMouse);
-				return (_bitmapdata.getPixel32(int(localPoint.x + _texture.frame.x + _texture.showRect.x),int(localPoint.y + _texture.frame.y + _texture.showRect.y))&0xff000000)!=0?this:null;
+				getBounds(this,_selfBounds);
+				return (_selfBounds.contains(localPoint.x,localPoint.y) && (_bitmapdata.getPixel32(int(localPoint.x + _texture.frame.x + _texture.showRect.x),int(localPoint.y + _texture.frame.y + _texture.showRect.y))&0xff000000)!=0)?this:null;
+		}
+		
+		public override function getBounds(targetSpace:DisplayObject, resultRect:Rectangle=null):Rectangle
+		{
+			if (resultRect == null) resultRect = new Rectangle();
+			
+			if (targetSpace == this) // optimization
+			{
+				vertexData.getPosition(3, sHelperPoint);
+				resultRect.setTo(0.0, 0.0, _texture.frame.width, _texture.frame.height);
+			}
+			else if (targetSpace == parent && rotation == 0.0) // optimization
+			{
+				var scaleX:Number = this.scaleX;
+				var scaleY:Number = this.scaleY;
+				_vertexData.getPosition(3, sHelperPoint);
+				resultRect.setTo(x - pivotX * scaleX,      y - pivotY * scaleY,
+					sHelperPoint.x * scaleX, sHelperPoint.y * scaleY);
+				if (scaleX < 0) { resultRect.width  *= -1; resultRect.x -= resultRect.width;  }
+				if (scaleY < 0) { resultRect.height *= -1; resultRect.y -= resultRect.height; }
+			}
+			else
+			{
+				getTransformationMatrix(targetSpace, sHelperMatrix);
+				_vertexData.getBounds(sHelperMatrix, 0, 4, resultRect);
+			}
+			
+			return resultRect;
 		}
 		
 		public function stop():void
@@ -84,7 +115,7 @@ package turkey.display
 			_playing = false;
 			_index = 0;
 			texture = _textures[0];
-			removeEventListener(TurkeyEnterFrameEvent.ENTER_FRAME,onEnterFrame);
+			Turkey.stage.stage2D.removeEventListener(Event.ENTER_FRAME,onEnterFrame);
 		}
 	}
 }
