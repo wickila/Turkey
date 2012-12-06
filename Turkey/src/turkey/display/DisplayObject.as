@@ -1,6 +1,7 @@
 package turkey.display
 {
 	import flash.geom.Matrix;
+	import flash.geom.Matrix3D;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.ui.Mouse;
@@ -34,6 +35,7 @@ package turkey.display
 		
 		protected var _mouseEnabled:Boolean=true;
 		protected var _buttonMode:Boolean = false;
+		protected var _colorMatrix:Matrix3D;
 		protected var _alpha:Number=1;
 		protected var _visible:Boolean = true;
 		protected var _blendMode:String = BlendMode.NORMAL;
@@ -53,6 +55,7 @@ package turkey.display
 		public function DisplayObject()
 		{
 			_transformationMatrix = new Matrix();
+			_colorMatrix = new Matrix3D();
 		}
 
 		public function get x():Number
@@ -570,11 +573,12 @@ package turkey.display
 		/**
 		 *	加入到渲染队列当中，如果有滤镜，则添加进渲染队列，并且渲染(因为如果有子对象，可以一次画完以后，再一次运用滤镜，而不必对每个子对象都分别运用滤镜，可以提高效率)
 		 * @param parentMatrix 父对象的二维空间矩阵
+		 * @param parentColorMatrix 父对象的颜色矩阵
 		 * @param parentAlpha 父对象的渲染透明度
 		 * @param parentFilter 父对象是否带滤镜，如果父对象带滤镜，滤镜渲染时，等候父对象的滤镜渲染时再渲染到缓冲区
 		 * 
 		 */		
-		public function addToRenderList(parentMatrix:Matrix,parentAlpha:Number,parentFilter:Boolean):void
+		public function addToRenderList(parentMatrix:Matrix,parentColorMatrix:Matrix3D,parentAlpha:Number,parentFilter:Boolean):void
 		{
 			var hasFilter:Boolean = filters && filters.length>0;
 			if(hasFilter)
@@ -582,7 +586,8 @@ package turkey.display
 				TurkeyRenderer.preFilter();
 			}
 			parentMatrix.concat(transformationMatrix);
-			TurkeyRenderer.addChildForRender(this,parentMatrix,parentAlpha*alpha);
+			parentColorMatrix.append(_colorMatrix);
+			TurkeyRenderer.addChildForRender(this,parentMatrix,parentColorMatrix,parentAlpha*alpha);
 			if(hasFilter)
 			{
 				TurkeyRenderer.render();
@@ -618,5 +623,16 @@ package turkey.display
 			Turkey.stage.mouseMoveEnable = _dragHelpBoolean;
 			Turkey.stage.removeEventListener(TurkeyMouseEvent.MOUSE_MOVE,onMouseMove);
 		}
+
+		public function get colorMatrix():Matrix3D
+		{
+			return _colorMatrix;
+		}
+
+		public function set colorMatrix(value:Matrix3D):void
+		{
+			_colorMatrix = value;
+		}
+
 	}
 }

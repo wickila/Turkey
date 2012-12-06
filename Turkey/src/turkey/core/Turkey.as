@@ -94,9 +94,9 @@ package turkey.core
 			);
 			var fragmentShaderAssembler:AGALMiniAssembler= new AGALMiniAssembler();
 			fragmentShaderAssembler.assemble( Context3DProgramType.FRAGMENT,
-				"tex ft1, v1, fs0 <2d,linear>\n" +
-				"mul ft1, ft1, v0.w\n"+
-				"mov oc, ft1"
+				"tex ft0, v1, fs0 <2d,linear>\n" +
+				"mul ft0.xyz, ft0.xyz, v0.xyz\n"+
+				"mul oc, ft0, v0.w"
 			);
 			var program:Program3D = Turkey.stage.context3D.createProgram();
 			program.upload(vertexShaderAssembler.agalcode, fragmentShaderAssembler.agalcode);

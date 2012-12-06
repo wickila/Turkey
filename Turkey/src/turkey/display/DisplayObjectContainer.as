@@ -1,6 +1,7 @@
 package turkey.display
 {
 	import flash.geom.Matrix;
+	import flash.geom.Matrix3D;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.getTimer;
@@ -262,7 +263,7 @@ package turkey.display
 			}
 		}
 		
-		override public function addToRenderList(parentMatrix:Matrix,parentAlpha:Number,parentFilter:Boolean):void
+		override public function addToRenderList(parentMatrix:Matrix, parentColorMatrix:Matrix3D, parentAlpha:Number,parentFilter:Boolean):void
 		{
 			var hasFilter:Boolean = filters&&filters.length>0;
 			if(hasFilter)
@@ -272,9 +273,10 @@ package turkey.display
 			var num:int = numChildren;
 			var a:Number = parentAlpha*alpha;
 			parentMatrix.concat(transformationMatrix);
+			parentColorMatrix.append(colorMatrix);
 			for(var i:int=0;i<num;i++)
 			{
-				getChildAt(i).addToRenderList(parentMatrix.clone(),a,hasFilter);
+				getChildAt(i).addToRenderList(parentMatrix.clone(),parentColorMatrix.clone(),a,hasFilter);
 			}
 			if(hasFilter)
 			{
