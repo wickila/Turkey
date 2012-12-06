@@ -33,9 +33,7 @@ package turkey.display
         public var stageWidth:int;
         public var stageHeight:int;
 		public var flashMatrix:Matrix3D;
-		public var trasformMatix:Matrix;
-        private var _color:uint;
-        private var mEnterFrameEvent:TurkeyEnterFrameEvent = new TurkeyEnterFrameEvent(TurkeyEvent.ENTER_FRAME, 0.0);
+//        private var mEnterFrameEvent:TurkeyEnterFrameEvent = new TurkeyEnterFrameEvent(TurkeyEvent.ENTER_FRAME, 0.0);
 		private var _timer:Timer;
 		private var _time:uint;
 		private var _frameRate:int;
@@ -45,9 +43,6 @@ package turkey.display
 		private static var _bColorG:uint;
 		private static var _bColorB:uint;
 		private var sceneTexture:Texture;
-		private var grayscaleProgram:Program3D;
-		private var postFilterVertexBuffer:VertexBuffer3D;
-		private var postFilterIndexBuffer:IndexBuffer3D;
         
         public function Stage(stage:flash.display.Stage,stageWidth:Number=0,stageHeight:Number=0, frameRate:int=60,color:uint=0)
         {
@@ -56,13 +51,13 @@ package turkey.display
             if(stageHeight==0)stageHeight = stage.stageHeight;
 			this.stageWidth = stageWidth;
 			this.stageHeight = stageHeight;
-			trasformMatix = new Matrix();
+			_transformationMatrix = new Matrix();
+			_colorMatrix = new Matrix3D();
 			_mouseEnabled = false;
-            _color = color;
-			_bColorA = (_color & 0xff000000)/0xff;
-			_bColorR = (_color & 0xff0000)/0xff;
-			_bColorG = (_color & 0xff00)/0xff;
-			_bColorB = (_color & 0xff)/0xff;
+			_bColorA = (color & 0xff000000)/0xff;
+			_bColorR = (color & 0xff0000)/0xff;
+			_bColorG = (color & 0xff00)/0xff;
+			_bColorB = (color & 0xff)/0xff;
 			_frameRate = frameRate;
 			_timer = new Timer(1000/frameRate);
 			_timer.addEventListener(TimerEvent.TIMER,onTimer);
@@ -123,7 +118,7 @@ package turkey.display
 //			broadcastEvent(mEnterFrameEvent);
 			
 			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
-			addToRenderList(_transformationMatrix,1,false);
+			addToRenderList(_transformationMatrix,_colorMatrix,1,false);
 			TurkeyRenderer.render();
 			context3D.present();
 			
@@ -216,8 +211,5 @@ package turkey.display
         {
             throw new IllegalOperationError("Cannot rotate stage");
         }
-        
-        public function get color():uint { return _color; }
-        public function set color(value:uint):void { _color = value; }
     }
 }

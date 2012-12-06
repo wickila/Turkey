@@ -4,6 +4,7 @@ package
 	import flash.display.Loader;
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.geom.Matrix3D;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	
@@ -42,6 +43,12 @@ package
 				img.x = stage.stageWidth*Math.random();
 				img.y = stage.stageHeight*Math.random();
 				img.buttonMode = true;
+//				img.colorMatrix = new Matrix3D(new <Number>[
+//					2,0,0,0,
+//					0,2,0,0,
+//					0,0,5,0,
+//					0,0,0,1,
+//				]);
 				img.mouseEnabled = false;
 				Turkey.stage.addChild(img);
 			}

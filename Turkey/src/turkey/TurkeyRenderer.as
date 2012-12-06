@@ -8,6 +8,8 @@ package turkey
 	import flash.display3D.VertexBuffer3D;
 	import flash.display3D.textures.TextureBase;
 	import flash.geom.Matrix;
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
 	
 	import turkey.core.Turkey;
 	import turkey.display.DisplayObject;
@@ -29,6 +31,9 @@ package turkey
 		private static var _drawIndex:uint=0;
 		private static var _drawIndexs:Vector.<int> = new Vector.<int>();
 		private static var _currentTexture:TextureBase;
+		private static var _colorSourceHelperVector:Vector.<Number> = new <Number>[1,1,1];
+		private static var _colorHelperVector:Vector.<Number> = new Vector.<Number>(3);
+		private static var _colorAlphaHelperVector:Vector3D = new Vector3D;
 		
 		public function TurkeyRenderer()
 		{
@@ -103,21 +108,27 @@ package turkey
 		 * @param alpha 经过计算后的显示对象的透明度
 		 * 
 		 */		
-		public static function addChildForRender(child:DisplayObject,matrix:Matrix,alpha:Number):void
+		public static function addChildForRender(child:DisplayObject,matrix:Matrix,colorMatrix:Matrix3D,alpha:Number):void
 		{
 			var raw:Vector.<Number> = child.vertexData.rawData;
+			colorMatrix.transformVectors(_colorSourceHelperVector,_colorHelperVector);
+			colorMatrix.copyRowTo(3,_colorAlphaHelperVector);
+			
+			var r:Number = _colorHelperVector[0];
+			var g:Number = _colorHelperVector[1];
+			var b:Number = _colorHelperVector[2];
 			var i:int = _renderNum<<5;//_renderNum * 4 * 8,4个顶点，每个顶点8个数据:x,y,r,g,b,a,u,v
-			for (var j:int=0; j<4; ++j)//此for循环里面做了三件事，1，把显示对象的顶点数据加入到渲染队列里面。2，设置顶点数据的空间坐标。 3，设置顶点坐标的alpha颜色值 (_vertexData.append(child.vertexData);_vertexData.transformVertex(i*4,matrix,4);_vertexData.setAlpha(_renderNum*4,parentAlpha);
+			for (var j:int=0; j<4; ++j)//此for循环里面做了四件事，1，把显示对象的顶点数据加入到渲染队列里面。2，设置顶点数据的空间坐标。3,设置顶点坐标的颜色值 4，设置顶点坐标的alpha颜色值 (_vertexData.append(child.vertexData);_vertexData.transformVertex(i*4,matrix,4);_vertexData.setAlpha(_renderNum*4,parentAlpha);
 			{
 				var m:int = j<<3;//j*8
 				var x:Number = raw[m];
 				var y:Number = raw[m+1];
 				_vertexData[i+m]   = matrix.a * x + matrix.c * y + matrix.tx;//x
 				_vertexData[i+m+1] = matrix.d * y + matrix.b * x + matrix.ty;//y
-				_vertexData[i+m+2] = raw[m+2];//r
-				_vertexData[i+m+3] = raw[m+3];//g
-				_vertexData[i+m+4] = raw[m+4];//b
-				_vertexData[i+m+5] = alpha;//a
+				_vertexData[i+m+2] = r;//r
+				_vertexData[i+m+3] = g;//g
+				_vertexData[i+m+4] = b;//b
+				_vertexData[i+m+5] = _colorAlphaHelperVector.x * r + _colorAlphaHelperVector.y * g + _colorAlphaHelperVector.z * b + _colorAlphaHelperVector.w * alpha;//a
 				_vertexData[i+m+6] = raw[m+6];//u
 				_vertexData[i+m+7] = raw[m+7];//v
 			}
