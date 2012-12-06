@@ -13,17 +13,18 @@ package turkey.filters
 	public class GlowFilter extends BlurFilter
 	{
 		private var _glowProgram:Program3D = null;
-		private var _copyProgram:Program3D = null;
 		private var _addProgram:Program3D = null;
 		private var colorVector:Vector.<Number> = new <Number>[0, 0, 1, 1];
 		private static const GlowFilter_CONSTANTS:Vector.<Number> = new <Number>[1, 1, 1, 1];
 		private static var tempTexture:TextureBase;
-		public function GlowFilter(color:uint,blurX:Number=1, blurY:Number=1)
+		public function GlowFilter(color:uint,blurX:Number=1, blurY:Number=1, strength:Number = 0)
 		{
+			_gaussians = new <Number>[0.1, 0.1, 0.1, 0.1, 0.2, 0.1, 0.1, 0.1, 0.1];
 			super(blurX, blurY);
 			colorVector[0] = ((uint(color>>16) & 0xff))/0xff;
 			colorVector[1] = ((uint(color>>8) & 0xff))/0xff;
 			colorVector[2] = ((uint(color) & 0xff))/0xff;
+			colorVector[3] = 1+(strength/10);
 		}
 		
 		override public function render(renderToBuff:Boolean=true):void
@@ -105,13 +106,12 @@ package turkey.filters
 					"mul ft2, ft2, " + _gauss_regs[8] + "   \n" +
 					"add ft2, ft1, ft2\n"+
 					"mul ft2, ft2.w, fc3\n" +
+					"mul ft2, ft2, fc3.w\n" +
 					"mov oc, ft2                               \n";
 				
 				var vertexProgramCode:String = "m44 op, va0, vc4\n" +//v4-v7为空间转屏幕坐标
 					"mov v0 va2\n";
 				_glowProgram = assembleAgal(fragmentCode, vertexProgramCode);
-				_copyProgram = assembleAgal("tex ft1, v0, fs0 <2d,linear,nomip>\n" +
-					"mov oc, ft1", vertexProgramCode);
 				_addProgram = assembleAgal("tex ft1, v0, fs0 <2d,linear,nomip>\n" +
 					"tex ft2, v0, fs1 <2d,linear,nomip>\n" +
 					"sub ft3.w, fc0.w, ft2.w\n"+

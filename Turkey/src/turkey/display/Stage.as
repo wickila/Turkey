@@ -158,6 +158,7 @@ package turkey.display
 		{
 			var p:Point = new Point(event.stageX,event.stageY);
 			var target:DisplayObject = hitTest(p,true);
+			if(target==null)return;
 			target.globalToLocal(new Point(event.stageX,event.stageY),p);
 			target.dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_MOVE,target,p.x,p.y,event.stageX,event.stageY));
 		}

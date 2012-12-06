@@ -53,7 +53,7 @@ package
 			var filter:RadialBlurFilter = new RadialBlurFilter(.5,.5,.005);
 			var grayFilter:GrayFilter = new GrayFilter();
 			var blurFilter:BlurFilter = new BlurFilter(3,3);
-			var glowFilter:GlowFilter = new GlowFilter(0xffff00,2,2);
+			var glowFilter:GlowFilter = new GlowFilter(0x0000ff,1,1,4);
 			var texture:Texture = Texture.fromBitmap(Bitmap(_loader.content));
 			var texture1:Texture = Texture.fromBitmap(Bitmap(_loader1.content));
 			var img:Image = new Image(texture);
@@ -72,7 +72,7 @@ package
 			sp.addEventListener(TurkeyMouseEvent.CLICK,onClick);
 			stage.addEventListener(MouseEvent.CLICK,onStageClick);
 			Turkey.stage.addChild(sp);
-			addEventListener(Event.ENTER_FRAME,onEnterFrame);
+//			addEventListener(Event.ENTER_FRAME,onEnterFrame);
 			var dir:int=1;
 			function onEnterFrame(event2:Event):void
 			{
