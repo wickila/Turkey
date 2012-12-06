@@ -47,7 +47,6 @@ package turkey.utils
         public static const TEXCOORD_OFFSET:int = 6;
         
         private var mRawData:Vector.<Number>;
-        private var mPremultipliedAlpha:Boolean;
         private var mNumVertices:int;
 
         /** Helper object. */
@@ -57,7 +56,6 @@ package turkey.utils
         public function VertexData(numVertices:int, premultipliedAlpha:Boolean=false)
         {
             mRawData = new <Number>[];
-            mPremultipliedAlpha = premultipliedAlpha;
             this.numVertices = numVertices;
         }
 
@@ -68,11 +66,10 @@ package turkey.utils
             if (numVertices < 0 || vertexID + numVertices > mNumVertices)
                 numVertices = mNumVertices - vertexID;
             
-            var clone:VertexData = new VertexData(0, mPremultipliedAlpha);
+            var clone:VertexData = new VertexData(0);
             clone.mNumVertices = numVertices; 
             clone.mRawData = mRawData.slice(vertexID * ELEMENTS_PER_VERTEX, 
                                             numVertices * ELEMENTS_PER_VERTEX); 
-            clone.mRawData.fixed = true;
             return clone;
         }
         
@@ -98,17 +95,13 @@ package turkey.utils
         /** Appends the vertices from another VertexData object. */
         public function append(data:VertexData):void
         {
-            mRawData.fixed = false;
-            
-            var targetIndex:int = mRawData.length;
             var rawData:Vector.<Number> = data.mRawData;
             var rawDataLength:int = rawData.length;
             
             for (var i:int=0; i<rawDataLength; ++i)
-                mRawData[targetIndex++] = rawData[i];
+                mRawData.push(rawData[i]);
             
             mNumVertices += data.numVertices;
-            mRawData.fixed = true;
         }
         
         // functions
@@ -133,7 +126,7 @@ package turkey.utils
         public function setColor(vertexID:int, color:uint):void
         {   
             var offset:int = getOffset(vertexID) + COLOR_OFFSET;
-            var multiplier:Number = mPremultipliedAlpha ? mRawData[int(offset+3)] : 1.0;
+            var multiplier:Number = mRawData[int(offset+3)];
             mRawData[offset]        = ((color >> 16) & 0xff) / 255.0 * multiplier;
             mRawData[int(offset+1)] = ((color >>  8) & 0xff) / 255.0 * multiplier;
             mRawData[int(offset+2)] = ( color        & 0xff) / 255.0 * multiplier;
@@ -143,7 +136,7 @@ package turkey.utils
         public function getColor(vertexID:int):uint
         {
             var offset:int = getOffset(vertexID) + COLOR_OFFSET;
-            var divisor:Number = mPremultipliedAlpha ? mRawData[offset+3] : 1.0;
+            var divisor:Number = mRawData[offset+3];
             
             if (divisor == 0) return 0;
             else
@@ -159,19 +152,11 @@ package turkey.utils
         /** Updates the alpha value of a vertex (range 0-1). */
         public function setAlpha(vertexID:int, alpha:Number):void
         {
-            var offset:int = getOffset(vertexID) + COLOR_OFFSET + 3;
-            
-            if (mPremultipliedAlpha)
-            {
-                if (alpha < 0.001) alpha = 0.001; // zero alpha would wipe out all color data
-                var color:uint = getColor(vertexID);
-                mRawData[offset] = alpha;
-                setColor(vertexID, color);
-            }
-            else
-            {
-                mRawData[offset] = alpha;
-            }
+            var offset:int = (vertexID * ELEMENTS_PER_VERTEX) + COLOR_OFFSET + 3;
+            mRawData[offset] = alpha;
+            mRawData[offset+=ELEMENTS_PER_VERTEX] = alpha;
+            mRawData[offset+=ELEMENTS_PER_VERTEX] = alpha;
+            mRawData[offset+=ELEMENTS_PER_VERTEX] = alpha;
         }
         
         /** Returns the alpha value of a vertex in the range 0-1. */
@@ -230,35 +215,6 @@ package turkey.utils
         {
             for (var i:int=0; i<mNumVertices; ++i)
                 setColor(i, color);
-        }
-        
-        /** Sets all vertices of the object to the same alpha values. */
-        public function setUniformAlpha(alpha:Number):void
-        {
-            for (var i:int=0; i<mNumVertices; ++i)
-                setAlpha(i, alpha);
-        }
-        
-        /** Multiplies the alpha value of subsequent vertices with a certain delta. */
-        public function scaleAlpha(vertexID:int, alpha:Number, numVertices:int=1):void
-        {
-            if (alpha == 1.0) return;
-            if (numVertices < 0 || vertexID + numVertices > mNumVertices)
-                numVertices = mNumVertices - vertexID;
-             
-            var i:int;
-            
-            if (mPremultipliedAlpha)
-            {
-                for (i=0; i<numVertices; ++i)
-                    setAlpha(vertexID+i, getAlpha(vertexID+i) * alpha);
-            }
-            else
-            {
-                var offset:int = getOffset(vertexID) + COLOR_OFFSET + 3;
-                for (i=0; i<numVertices; ++i)
-                    mRawData[int(offset + i*ELEMENTS_PER_VERTEX)] *= alpha;
-            }
         }
         
         private function getOffset(vertexID:int):int
@@ -335,42 +291,10 @@ package turkey.utils
             return false;
         }
         
-        /** Changes the way alpha and color values are stored. Updates all exisiting vertices. */
-        public function setPremultipliedAlpha(value:Boolean, updateData:Boolean=true):void
-        {
-            if (value == mPremultipliedAlpha) return;
-            
-            if (updateData)
-            {
-                var dataLength:int = mNumVertices * ELEMENTS_PER_VERTEX;
-                
-                for (var i:int=COLOR_OFFSET; i<dataLength; i += ELEMENTS_PER_VERTEX)
-                {
-                    var alpha:Number = mRawData[i+3];
-                    var divisor:Number = mPremultipliedAlpha ? alpha : 1.0;
-                    var multiplier:Number = value ? alpha : 1.0;
-                    
-                    if (divisor != 0)
-                    {
-                        mRawData[i]        = mRawData[i]        / divisor * multiplier;
-                        mRawData[int(i+1)] = mRawData[int(i+1)] / divisor * multiplier;
-                        mRawData[int(i+2)] = mRawData[int(i+2)] / divisor * multiplier;
-                    }
-                }
-            }
-            
-            mPremultipliedAlpha = value;
-        }
-        
-        /** Indicates if the rgb values are stored premultiplied with the alpha value. */
-        public function get premultipliedAlpha():Boolean { return mPremultipliedAlpha; }
-        
         /** The total number of vertices. */
         public function get numVertices():int { return mNumVertices; }
         public function set numVertices(value:int):void
         {
-            mRawData.fixed = false;
-            
             var i:int;
             var delta:int = value - mNumVertices;
             
@@ -381,7 +305,6 @@ package turkey.utils
                 mRawData.pop();
             
             mNumVertices = value;
-            mRawData.fixed = true;
         }
         
         /** The raw vertex data; not a copy! */

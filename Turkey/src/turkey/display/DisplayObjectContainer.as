@@ -1,13 +1,11 @@
 package turkey.display
 {
-	import com.adobe.utils.PerspectiveMatrix3D;
-	
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.utils.getTimer;
 	
 	import turkey.TurkeyRenderer;
-	import turkey.core.Turkey;
 	import turkey.core.turkey_internal;
 	import turkey.events.TurkeyEvent;
 	import turkey.utils.MatrixUtil;
@@ -15,15 +13,17 @@ package turkey.display
 	use namespace turkey_internal
 	public class DisplayObjectContainer extends DisplayObject
 	{
-		private var _children:Vector.<DisplayObject>;
+		protected var _children:Vector.<DisplayObject>;
 		private var _mouseChildren:Boolean = true;
 		
 		private static var sHelperMatrix:Matrix = new Matrix();
 		private static var sHelperPoint:Point = new Point();
 		private static var _broadcastListeners:Vector.<DisplayObject> = new <DisplayObject>[];
+		private var _hitMouseList:Vector.<DisplayObject>;
 		public function DisplayObjectContainer()
 		{
 			_children = new Vector.<DisplayObject>();
+			_hitMouseList = new Vector.<DisplayObject>();
 		}
 		
 		public function get mouseChildren():Boolean
@@ -51,7 +51,7 @@ package turkey.display
 				child.removeFromParent();
 				if (index == numChildren) _children.push(child);
 				else                      _children.splice(index, 0, child);
-				
+				if((child is DisplayObjectContainer)||child.mouseEnabled)addToMouseHitList(child);
 				child.setParent(this);
 				child.dispatchEventWith(TurkeyEvent.ADDED, true);
 				
@@ -141,6 +141,7 @@ package turkey.display
 				}
 				
 				child.setParent(null);
+				removeFromMouseHitList(child);
 				index = _children.indexOf(child);
 				if (index >= 0) _children.splice(index, 1); 
 				return child;
@@ -148,6 +149,17 @@ package turkey.display
 			{
 				throw new RangeError("Invalid child index");
 			}
+		}
+		
+		internal function addToMouseHitList(child:DisplayObject):void
+		{
+			if(_hitMouseList.indexOf(child)<0)_hitMouseList.push(child);
+		}
+		
+		internal function removeFromMouseHitList(child:DisplayObject):void
+		{
+			var index:int = _hitMouseList.indexOf(child);
+			if(index>-1)_hitMouseList.splice(index,1);
 		}
 		
 		public function getChildAt(index:int):DisplayObject
@@ -207,10 +219,10 @@ package turkey.display
 				return null;
 			var localX:Number = localPoint.x;
 			var localY:Number = localPoint.y;
-			var numChildren:int = _children.length;
+			var num:int = _children.length;
 			if(!forMouse)
 			{
-				for (var i:int=numChildren-1; i>=0; --i) // front to back!
+				for (var i:int=num-1; i>=0; --i) // front to back!
 				{
 					var child:DisplayObject = _children[i];
 					getTransformationMatrix(child, sHelperMatrix);
@@ -223,11 +235,10 @@ package turkey.display
 			{
 				if(mouseChildren)
 				{
-					for (var j:int=numChildren-1; j>=0; --j) // front to back!
+					for (var j:int=num-1; j>=0; --j) // front to back!
 					{
 						var child1:DisplayObject = _children[j];
 						getTransformationMatrix(child1, sHelperMatrix);
-						
 						MatrixUtil.transformCoords(sHelperMatrix, localX, localY, sHelperPoint);
 						var target1:DisplayObject = child1.hitTest(sHelperPoint,forMouse);
 						
@@ -245,27 +256,27 @@ package turkey.display
 		override public function hitMouse(stageX:Number,stageY:Number):void
 		{
 			super.hitMouse(stageX,stageY);
-			for(var i:int=0;i<_children.length;i++)
+			for(var i:int=0;i<_hitMouseList.length;i++)
 			{
-				_children[i].hitMouse(stageX,stageY);
+				_hitMouseList[i].hitMouse(stageX,stageY);
 			}
 		}
 		
 		override public function addToRenderList(parentMatrix:Matrix,parentAlpha:Number,parentFilter:Boolean):void
 		{
-			if(!hasVisibleArea)return;
-			if(filters&&filters.length)
+			var hasFilter:Boolean = filters&&filters.length>0;
+			if(hasFilter)
 			{
 				TurkeyRenderer.preFilter();
 			}
-			for(var i:int=0;i<numChildren;i++)
+			var num:int = numChildren;
+			var a:Number = parentAlpha*alpha;
+			parentMatrix.concat(transformationMatrix);
+			for(var i:int=0;i<num;i++)
 			{
-				var child:DisplayObject = getChildAt(i);
-				var matrix:Matrix = parentMatrix.clone();
-				MatrixUtil.prependMatrix(matrix,transformationMatrix);
-				child.addToRenderList(matrix,parentAlpha*alpha,(filters&&filters.length>0));
+				getChildAt(i).addToRenderList(parentMatrix.clone(),a,hasFilter);
 			}
-			if(filters&&filters.length)
+			if(hasFilter)
 			{
 				TurkeyRenderer.render();
 				for(i=0;i<filters.length;i++)

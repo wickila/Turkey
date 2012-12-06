@@ -23,6 +23,7 @@ package
 	public class TestImage extends flash.display.Sprite
 	{
 		private var _loader:Loader;
+		private var _loader1:Loader;
 		private var _urlLoader:URLLoader;
 		private var _img:Image;
 		public function TestImage()
@@ -42,21 +43,29 @@ package
 		
 		protected function onTextureComplete(event:Event):void
 		{
+			_loader1 = new Loader();
+			_loader1.contentLoaderInfo.addEventListener(Event.COMPLETE,onTextureComplete1);
+			_loader1.load(new URLRequest("image.jpg"));
+		}
+		
+		protected function onTextureComplete1(event:Event):void
+		{
 			var filter:RadialBlurFilter = new RadialBlurFilter(.5,.5,.005);
 			var grayFilter:GrayFilter = new GrayFilter();
 			var blurFilter:BlurFilter = new BlurFilter(3,3);
 			var glowFilter:GlowFilter = new GlowFilter(0xffff00,2,2);
 			var texture:Texture = Texture.fromBitmap(Bitmap(_loader.content));
+			var texture1:Texture = Texture.fromBitmap(Bitmap(_loader1.content));
 			var img:Image = new Image(texture);
-			var img2:Image = new Image(Texture.fromBitmap(Bitmap(_loader.content)));
-			img2.x = img2.y = 300;
+			var img2:Image = new Image(texture);
+			img2.y = 400;
 			img2.filters = [glowFilter];
-			img.filters = [filter];
+//			img.filters = [filter];
 			var sp:turkey.display.Sprite = new turkey.display.Sprite();
 			sp.mouseEnabled = false;
 			sp.addChild(img);
 			sp.addChild(img2);
-//			sp.filters = [grayFilter];
+			//			sp.filters = [grayFilter];
 			img.addEventListener(TurkeyMouseEvent.CLICK,onClick);
 			img.addEventListener(TurkeyMouseEvent.MOUSE_DOWN,onMouseDown);
 			img.addEventListener(TurkeyMouseEvent.MOUSE_UP,onMouseUp);

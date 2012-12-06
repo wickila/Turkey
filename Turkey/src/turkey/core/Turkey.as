@@ -11,6 +11,7 @@ package turkey.core
 	
 	import turkey.display.Image;
 	import turkey.display.Stage;
+	import turkey.enumrate.BlendMode;
 	import turkey.events.EventDispatcher;
 	import turkey.events.TurkeyEvent;
 	import turkey.utils.TurkeyUtils;
@@ -65,6 +66,10 @@ package turkey.core
 				true
 			);
 			_sceneTexture = _sceneTexture1;
+			var arr:Array = BlendMode.getBlendFactors(BlendMode.NORMAL);
+			stage.context3D.setBlendFactors(arr[0],arr[1]);
+			stage.context3D.setProgram(Turkey.getProgram(Image.IMAGE_PROGRAM));
+			stage.context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, stage.flashMatrix, true);
 			stage.dispatchEvent(new TurkeyEvent(TurkeyEvent.COMPLETE));
 		}
 		
@@ -89,7 +94,7 @@ package turkey.core
 			);
 			var fragmentShaderAssembler:AGALMiniAssembler= new AGALMiniAssembler();
 			fragmentShaderAssembler.assemble( Context3DProgramType.FRAGMENT,
-				"tex ft1, v1, fs0 <2d,linear,nomip>\n" +
+				"tex ft1, v1, fs0 <2d,linear>\n" +
 				"mul ft1, ft1, v0.w\n"+
 				"mov oc, ft1"
 			);
