@@ -265,6 +265,7 @@ package turkey.display
 		
 		override public function addToRenderList(parentMatrix:Matrix, parentColorMatrix:Matrix3D, parentAlpha:Number,parentFilter:Boolean):void
 		{
+			if(!hasVisibleArea)return;
 			var hasFilter:Boolean = filters&&filters.length>0;
 			if(hasFilter)
 			{

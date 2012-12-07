@@ -550,7 +550,7 @@ package turkey.display
 		
 		public function get hasVisibleArea():Boolean
 		{
-			return _alpha != 0.0 && _visible && _scaleX != 0.0 && _scaleY != 0.0;
+			return _visible && _alpha != 0.0 && _scaleX != 0.0 && _scaleY != 0.0;
 		}
 		/**
 		 * 与鼠标碰撞，方便响应MouseOver与MouseOut事件
@@ -580,6 +580,7 @@ package turkey.display
 		 */		
 		public function addToRenderList(parentMatrix:Matrix,parentColorMatrix:Matrix3D,parentAlpha:Number,parentFilter:Boolean):void
 		{
+			if(!hasVisibleArea)return;
 			var hasFilter:Boolean = filters && filters.length>0;
 			if(hasFilter)
 			{

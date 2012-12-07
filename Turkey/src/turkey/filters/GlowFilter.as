@@ -19,7 +19,6 @@ package turkey.filters
 		private static var tempTexture:TextureBase;
 		public function GlowFilter(color:uint,blurX:Number=1, blurY:Number=1, strength:Number = 0)
 		{
-			_gaussians = new <Number>[0.1, 0.1, 0.1, 0.1, 0.2, 0.1, 0.1, 0.1, 0.1];
 			super(blurX, blurY);
 			colorVector[0] = ((uint(color>>16) & 0xff))/0xff;
 			colorVector[1] = ((uint(color>>8) & 0xff))/0xff;
