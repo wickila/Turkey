@@ -53,30 +53,35 @@ package
 			var filter:RadialBlurFilter = new RadialBlurFilter(.5,.5,.005);
 			var grayFilter:GrayFilter = new GrayFilter();
 			var blurFilter:BlurFilter = new BlurFilter(3,3);
-			var glowFilter:GlowFilter = new GlowFilter(0x0000ff,1,1,4);
+			var glowFilter:GlowFilter = new GlowFilter(0xff0000,1,1,4);
 			var texture:Texture = Texture.fromBitmap(Bitmap(_loader.content));
 			var texture1:Texture = Texture.fromBitmap(Bitmap(_loader1.content));
 			var img:Image = new Image(texture);
 			var img2:Image = new Image(texture);
 			img2.y = 400;
-			img2.filters = [glowFilter];
-//			img.filters = [filter];
+			img2.pivotX = 80;
+			img2.pivotY = img2.height/2;
+			img.buttonMode = true;
+//			img2.visible = false;
+//			img2.filters = [glowFilter];
+//			img.filters = [glowFilter];
 			var sp:turkey.display.Sprite = new turkey.display.Sprite();
 			sp.mouseEnabled = false;
 			sp.addChild(img);
 			sp.addChild(img2);
-			//			sp.filters = [grayFilter];
+			sp.filters = [grayFilter];
 			img.addEventListener(TurkeyMouseEvent.CLICK,onClick);
 			img.addEventListener(TurkeyMouseEvent.MOUSE_DOWN,onMouseDown);
 			img.addEventListener(TurkeyMouseEvent.MOUSE_UP,onMouseUp);
 			sp.addEventListener(TurkeyMouseEvent.CLICK,onClick);
 			stage.addEventListener(MouseEvent.CLICK,onStageClick);
 			Turkey.stage.addChild(sp);
-//			addEventListener(Event.ENTER_FRAME,onEnterFrame);
+			addEventListener(Event.ENTER_FRAME,onEnterFrame);
 			var dir:int=1;
 			function onEnterFrame(event2:Event):void
 			{
 				img2.x += dir;
+//				img2.rotation += Math.PI/180;
 				if(img2.x>stage.stageWidth)
 				{
 					dir = -1;

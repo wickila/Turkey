@@ -8,6 +8,7 @@ package turkey.display
     import flash.display3D.VertexBuffer3D;
     import flash.display3D.textures.Texture;
     import flash.errors.IllegalOperationError;
+    import flash.events.Event;
     import flash.events.MouseEvent;
     import flash.events.TimerEvent;
     import flash.geom.Matrix;
@@ -60,7 +61,6 @@ package turkey.display
 			_bColorB = (color & 0xff)/0xff;
 			_frameRate = frameRate;
 			_timer = new Timer(1000/frameRate);
-			_timer.addEventListener(TimerEvent.TIMER,onTimer);
 			flashMatrix = new Matrix3D(Vector.<Number>(
 				[
 					2/stageWidth,0,0,0,
@@ -78,6 +78,11 @@ package turkey.display
 			stage2D.addEventListener(MouseEvent.RIGHT_MOUSE_UP,onStageClick);
 			stage3D.requestContext3D();
         }
+		
+		protected function onEnterFrame(event:Event):void
+		{
+			onTimer(null);
+		}
 		/**
 		 * 
 		 * @return 是否监听鼠标移动事件，此事件比较耗效率，所以默认禁用
@@ -106,8 +111,7 @@ package turkey.display
 			context3D = stage3D.context3D;
 			context3D.enableErrorChecking = Capabilities.isDebugger;
 			context3D.configureBackBuffer(stageWidth, stageHeight, 0, false);
-			_timer.start();
-			_time = getTimer();
+			stage2D.addEventListener(Event.ENTER_FRAME,onEnterFrame);
 			dispatchEvent(new TurkeyEvent(TurkeyEvent.CONTEXT3D_CREATE));
 		}
 		

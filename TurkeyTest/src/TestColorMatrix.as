@@ -52,19 +52,19 @@ package
 			var img2:Image = new Image(texture);
 			img2.y = 400;
 			img2.colorMatrix = new Matrix3D(new <Number>[
-				2,0,0,0,
-				0,2,0,0,
-				0,0,5,0,
+				.9,0,0,0,
+				0,.9,0,0,
+				0,0,.9,0,
 				0,0,0,1,
 			]);
 			var sp:turkey.display.Sprite = new turkey.display.Sprite();
 			sp.mouseEnabled = false;
-			sp.colorMatrix = new Matrix3D(new <Number>[
-				2,0,0,0,
-				0,2,0,0,
-				0,0,5,0,
-				0,0,0,1,
-			]);
+//			sp.colorMatrix = new Matrix3D(new <Number>[
+//				2,0,0,0,
+//				0,2,0,0,
+//				0,0,5,0,
+//				0,0,0,1,
+//			]);
 			sp.addChild(img);
 			sp.addChild(img2);
 			img.addEventListener(TurkeyMouseEvent.CLICK,onClick);
