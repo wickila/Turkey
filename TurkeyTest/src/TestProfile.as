@@ -10,6 +10,7 @@ package
 	
 	import turkey.core.Turkey;
 	import turkey.display.Image;
+	import turkey.enumrate.BlendMode;
 	import turkey.events.TurkeyEvent;
 	import turkey.textures.Texture;
 	
@@ -43,6 +44,7 @@ package
 				img.x = stage.stageWidth*Math.random();
 				img.y = stage.stageHeight*Math.random();
 				img.buttonMode = true;
+//				img.blendMode = BlendMode.SCREEN;
 //				img.colorMatrix = new Matrix3D(new <Number>[
 //					2,0,0,0,
 //					0,2,0,0,

@@ -28,7 +28,7 @@ package turkey.core
 		{
 		}
 		
-		public static function init(stage2D:flash.display.Stage,stageWidth:Number=0,stageHeight:Number=0,frameRate:int=60,color:uint=0xffffffff):void
+		public static function init(stage2D:flash.display.Stage,stageWidth:Number=0,stageHeight:Number=0,frameRate:int=60,color:uint=0x00000000):void
 		{
 			stage = new turkey.display.Stage(stage2D,stageWidth,stageHeight,frameRate,color);
 			stage.addEventListener(TurkeyEvent.CONTEXT3D_CREATE,onStageInit);
@@ -66,8 +66,6 @@ package turkey.core
 				true
 			);
 			_sceneTexture = _sceneTexture1;
-			var arr:Array = BlendMode.getBlendFactors(BlendMode.NORMAL);
-			stage.context3D.setBlendFactors(arr[0],arr[1]);
 			stage.context3D.setProgram(Turkey.getProgram(Image.IMAGE_PROGRAM));
 			stage.context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, stage.flashMatrix, true);
 			stage.dispatchEvent(new TurkeyEvent(TurkeyEvent.COMPLETE));

@@ -14,11 +14,13 @@ package turkey
 	import turkey.core.Turkey;
 	import turkey.display.DisplayObject;
 	import turkey.display.Image;
+	import turkey.enumrate.BlendMode;
 	import turkey.utils.VertexData;
 
 	public class TurkeyRenderer
 	{
 		private static var _textures:Vector.<TextureBase>=new Vector.<TextureBase>();
+		private static var _blendModes:Vector.<String> = new Vector.<String>();
 		private static var _vertices:Vector.<Number> = new Vector.<Number>();
 		private static var _vertexbuffer:VertexBuffer3D;
 		private static var _vertexData:Vector.<Number> = new Vector.<Number>();
@@ -31,6 +33,7 @@ package turkey
 		private static var _drawIndex:uint=0;
 		private static var _drawIndexs:Vector.<int> = new Vector.<int>();
 		private static var _currentTexture:TextureBase;
+		private static var _currentBlendMode:String = null;
 		private static var _colorSourceHelperVector:Vector.<Number> = new <Number>[1,1,1];
 		private static var _colorHelperVector:Vector.<Number> = new Vector.<Number>(3);
 		private static var _colorAlphaHelperVector:Vector3D = new Vector3D;
@@ -77,6 +80,8 @@ package turkey
 			for(var i:int=0;i<_drawIndexs.length;i++)
 			{
 				_drawIndex = _drawIndexs[i];
+				var arr:Array = BlendMode.getBlendFactors(_blendModes[i]);
+				context3D.setBlendFactors(arr[0],arr[1]);
 				context3D.setTextureAt(0, _textures[i]);
 				var num:int = (i==_drawIndexs.length-1)?(_renderNum-_drawIndex):(_drawIndexs[i+1]-_drawIndex);
 				context3D.drawTriangles(_indexBuffer,_drawIndexs[i]*6,num<<1);
@@ -134,12 +139,11 @@ package turkey
 			}
 			i= _renderNum<<2;//_renderNum*4
 			_indices.push(i,i+1,i+2,i+1,i+3,i+2);
-			if(_currentTexture==null){_currentTexture=child.texture.base;_drawIndexs.push(_renderNum);_textures.push(_currentTexture);};
-			if(_currentTexture != child.texture.base)
+			if((_currentTexture==null||_currentTexture != child.texture.base)||(_currentBlendMode==null||_currentBlendMode!=child.blendMode))//材质与blendmode相同的对象一起渲染
 			{
 				_drawIndexs.push(_renderNum);
-				_currentTexture = child.texture.base;
-				_textures.push(_currentTexture);
+				_textures.push(_currentTexture = child.texture.base);
+				_blendModes.push(_currentBlendMode=child.blendMode);
 			}
 			_renderNum ++;
 		}
@@ -156,7 +160,9 @@ package turkey
 			_vertexData = new Vector.<Number>();
 			_drawIndexs = new Vector.<int>();
 			_textures = new Vector.<TextureBase>();
+			_blendModes = new Vector.<String>();
 			_currentTexture = null;
+			_currentBlendMode = null;
 		}
 	}
 }
