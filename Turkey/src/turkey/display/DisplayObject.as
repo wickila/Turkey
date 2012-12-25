@@ -9,7 +9,6 @@ package turkey.display
 	
 	import turkey.TurkeyRenderer;
 	import turkey.core.Turkey;
-	import turkey.enumrate.BlendMode;
 	import turkey.errors.AbstractMethodError;
 	import turkey.events.EventDispatcher;
 	import turkey.events.TurkeyMouseEvent;
@@ -38,7 +37,7 @@ package turkey.display
 		protected var _colorMatrix:Matrix3D;
 		protected var _alpha:Number=1;
 		protected var _visible:Boolean = true;
-		protected var _blendMode:String = BlendMode.NORMAL;
+		protected var _blendMode:String = "normal";
 		protected var _parent:DisplayObjectContainer;
 		protected var _filters:Array;
 		protected var _transformationMatrix:Matrix;
@@ -308,7 +307,11 @@ package turkey.display
 		
 		internal function removeFromParent():void
 		{
-			if(_parent) _parent.removeChild(this);
+			if(_parent) 
+			{
+				_parent.removeChild(this);
+				_parent = null;
+			}
 		}
 
 		public function get parent():DisplayObjectContainer
@@ -633,6 +636,14 @@ package turkey.display
 		public function set colorMatrix(value:Matrix3D):void
 		{
 			_colorMatrix = value;
+		}
+		
+		public function dispose():void
+		{
+			if(parent)
+				parent.removeChild(this);
+			_vertexData = null;
+			filters = null;
 		}
 
 	}

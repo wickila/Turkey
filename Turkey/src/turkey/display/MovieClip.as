@@ -117,5 +117,12 @@ package turkey.display
 			texture = _textures[0];
 			Turkey.stage.stage2D.removeEventListener(Event.ENTER_FRAME,onEnterFrame);
 		}
+		
+		override public function dispose():void
+		{
+			stop();
+			_textures = null;
+			super.dispose();
+		}
 	}
 }

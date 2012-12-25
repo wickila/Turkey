@@ -108,5 +108,13 @@ package turkey.display
 		{
 			return _texture;
 		}
+		
+		override public function dispose():void
+		{
+			super.dispose();
+			_texture = null;
+			_bitmapdata = null;
+			_vertexDataCache = null;
+		}
 	}
 }

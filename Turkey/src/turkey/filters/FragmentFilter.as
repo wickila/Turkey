@@ -44,5 +44,9 @@ package turkey.filters
 			
 			return program;
 		}
+		
+		public function dispose():void{
+			
+		}
 	}
 }

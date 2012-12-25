@@ -3,9 +3,6 @@ package turkey.display
     import flash.display.Stage;
     import flash.display.Stage3D;
     import flash.display3D.Context3D;
-    import flash.display3D.IndexBuffer3D;
-    import flash.display3D.Program3D;
-    import flash.display3D.VertexBuffer3D;
     import flash.display3D.textures.Texture;
     import flash.errors.IllegalOperationError;
     import flash.events.Event;
@@ -15,12 +12,9 @@ package turkey.display
     import flash.geom.Matrix3D;
     import flash.geom.Point;
     import flash.system.Capabilities;
-    import flash.utils.Timer;
-    import flash.utils.getTimer;
     
     import turkey.TurkeyRenderer;
     import turkey.core.turkey_internal;
-    import turkey.events.TurkeyEnterFrameEvent;
     import turkey.events.TurkeyEvent;
     import turkey.events.TurkeyMouseEvent;
     
@@ -35,7 +29,6 @@ package turkey.display
         public var stageHeight:int;
 		public var flashMatrix:Matrix3D;
 //        private var mEnterFrameEvent:TurkeyEnterFrameEvent = new TurkeyEnterFrameEvent(TurkeyEvent.ENTER_FRAME, 0.0);
-		private var _timer:Timer;
 		private var _time:uint;
 		private var _frameRate:int;
 		private var _mouseMoveEnable:Boolean = false;
@@ -45,7 +38,7 @@ package turkey.display
 		private static var _bColorB:uint;
 		private var sceneTexture:Texture;
         
-        public function Stage(stage:flash.display.Stage,stageWidth:Number=0,stageHeight:Number=0, frameRate:int=60,color:uint=0)
+        public function Stage(stage:flash.display.Stage,stageWidth:Number=0,stageHeight:Number=0, color:uint=0)
         {
 			stage2D = stage;
             if(stageWidth ==0)stageWidth = stage.stageWidth;
@@ -59,8 +52,6 @@ package turkey.display
 			_bColorR = (color & 0xff0000)/0xff;
 			_bColorG = (color & 0xff00)/0xff;
 			_bColorB = (color & 0xff)/0xff;
-			_frameRate = frameRate;
-			_timer = new Timer(1000/frameRate);
 			flashMatrix = new Matrix3D(Vector.<Number>(
 				[
 					2/stageWidth,0,0,0,
@@ -81,7 +72,15 @@ package turkey.display
 		
 		protected function onEnterFrame(event:Event):void
 		{
-			onTimer(null);
+			//			mEnterFrameEvent.reset(TurkeyEvent.ENTER_FRAME, false, getTimer()-_time);
+			//			_time = getTimer();
+			//			broadcastEvent(mEnterFrameEvent);
+			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
+			addToRenderList(_transformationMatrix,_colorMatrix,1,false);
+			TurkeyRenderer.render();
+			context3D.present();
+			
+			hitMouse(stage2D.mouseX,stage2D.mouseY);
 		}
 		/**
 		 * 
@@ -113,20 +112,6 @@ package turkey.display
 			context3D.configureBackBuffer(stageWidth, stageHeight, 0, false);
 			stage2D.addEventListener(Event.ENTER_FRAME,onEnterFrame);
 			dispatchEvent(new TurkeyEvent(TurkeyEvent.CONTEXT3D_CREATE));
-		}
-		
-		private function onTimer(event:TimerEvent):void
-		{
-//			mEnterFrameEvent.reset(TurkeyEvent.ENTER_FRAME, false, getTimer()-_time);
-//			_time = getTimer();
-//			broadcastEvent(mEnterFrameEvent);
-			
-			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
-			addToRenderList(_transformationMatrix,_colorMatrix,1,false);
-			TurkeyRenderer.render();
-			context3D.present();
-			
-			hitMouse(stage2D.mouseX,stage2D.mouseY);
 		}
 		
 		private function onStageClick(event:MouseEvent):void
