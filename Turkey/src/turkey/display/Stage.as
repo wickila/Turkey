@@ -7,11 +7,12 @@ package turkey.display
     import flash.errors.IllegalOperationError;
     import flash.events.Event;
     import flash.events.MouseEvent;
-    import flash.events.TimerEvent;
     import flash.geom.Matrix;
     import flash.geom.Matrix3D;
     import flash.geom.Point;
     import flash.system.Capabilities;
+    import flash.ui.Mouse;
+    import flash.ui.MouseCursor;
     
     import turkey.TurkeyRenderer;
     import turkey.core.turkey_internal;
@@ -37,6 +38,7 @@ package turkey.display
 		private static var _bColorG:uint;
 		private static var _bColorB:uint;
 		private var sceneTexture:Texture;
+		public static var BUTTON_MODE = false;
         
         public function Stage(stage:flash.display.Stage,stageWidth:Number=0,stageHeight:Number=0, color:uint=0)
         {
@@ -75,12 +77,13 @@ package turkey.display
 			//			mEnterFrameEvent.reset(TurkeyEvent.ENTER_FRAME, false, getTimer()-_time);
 			//			_time = getTimer();
 			//			broadcastEvent(mEnterFrameEvent);
+			BUTTON_MODE = false;
 			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
 			addToRenderList(_transformationMatrix,_colorMatrix,1,false);
 			TurkeyRenderer.render();
 			context3D.present();
-			
 			hitMouse(stage2D.mouseX,stage2D.mouseY);
+			Mouse.cursor = BUTTON_MODE?MouseCursor.BUTTON:MouseCursor.AUTO;
 		}
 		/**
 		 * 

@@ -197,7 +197,6 @@ package turkey.display
 				if(_mouseEnabled)parent.addToMouseHitList(this);
 				else parent.removeFromMouseHitList(this);
 			}
-			Mouse.cursor = (_mouseEnabled && _buttonMode && !_mouseOut) ? MouseCursor.BUTTON : MouseCursor.AUTO;
 		}
 		
 		public function get alpha():Number
@@ -253,7 +252,6 @@ package turkey.display
 		{
 			if(_buttonMode == value)return;
 			_buttonMode = value;
-			Mouse.cursor = (_mouseEnabled && _buttonMode && !_mouseOut) ? MouseCursor.BUTTON : MouseCursor.AUTO;
 		}
 		
 		internal function get mouseOut():Boolean
@@ -275,7 +273,6 @@ package turkey.display
 					dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_OVER,this,mouseX,mouseY,_stageMousePoint.x,_stageMousePoint.y));
 				}
 			}
-			Mouse.cursor = (_mouseEnabled && _buttonMode && !_mouseOut) ? MouseCursor.BUTTON : MouseCursor.AUTO;
 		}
 		
 		public function get vertexData():VertexData
@@ -572,6 +569,7 @@ package turkey.display
 			{
 				mouseOut = true;
 			}
+			Stage.BUTTON_MODE = (Stage.BUTTON_MODE||(_mouseEnabled && _buttonMode && !_mouseOut));
 		}
 		/**
 		 *	加入到渲染队列当中，如果有滤镜，则添加进渲染队列，并且渲染(因为如果有子对象，可以一次画完以后，再一次运用滤镜，而不必对每个子对象都分别运用滤镜，可以提高效率)

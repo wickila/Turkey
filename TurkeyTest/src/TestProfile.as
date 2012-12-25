@@ -44,7 +44,7 @@ package
 				img.x = stage.stageWidth*Math.random();
 				img.y = stage.stageHeight*Math.random();
 				img.buttonMode = true;
-//				img.blendMode = BlendMode.SCREEN;
+				img.blendMode = BlendMode.SCREEN;
 //				img.colorMatrix = new Matrix3D(new <Number>[
 //					2,0,0,0,
 //					0,2,0,0,
