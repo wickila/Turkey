@@ -21,6 +21,8 @@ package turkey.display
     
     use namespace turkey_internal;
     
+	
+	[Event(name="complete", type="turkey.events.TurkeyEvent")]
     public class Stage extends DisplayObjectContainer
     {
 		public var stage2D:flash.display.Stage;
@@ -29,6 +31,8 @@ package turkey.display
         public var stageWidth:int;
         public var stageHeight:int;
 		public var flashMatrix:Matrix3D;
+		public var buttomMouse:String = MouseCursor.BUTTON;
+		public var autoMouse:String = MouseCursor.AUTO;
 //        private var mEnterFrameEvent:TurkeyEnterFrameEvent = new TurkeyEnterFrameEvent(TurkeyEvent.ENTER_FRAME, 0.0);
 		private var _time:uint;
 		private var _frameRate:int;
@@ -38,7 +42,8 @@ package turkey.display
 		private static var _bColorG:uint;
 		private static var _bColorB:uint;
 		private var sceneTexture:Texture;
-		public static var BUTTON_MODE = false;
+		
+		public static var BUTTON_MODE:Boolean = false;
         
         public function Stage(stage:flash.display.Stage,stageWidth:Number=0,stageHeight:Number=0, color:uint=0)
         {
@@ -82,8 +87,9 @@ package turkey.display
 			addToRenderList(_transformationMatrix,_colorMatrix,1,false);
 			TurkeyRenderer.render();
 			context3D.present();
+			
 			hitMouse(stage2D.mouseX,stage2D.mouseY);
-			Mouse.cursor = BUTTON_MODE?MouseCursor.BUTTON:MouseCursor.AUTO;
+			Mouse.cursor = BUTTON_MODE?buttomMouse:autoMouse;
 		}
 		/**
 		 * 

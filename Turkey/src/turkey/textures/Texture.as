@@ -18,13 +18,9 @@ package turkey.textures
     import flash.geom.Matrix;
     import flash.geom.Point;
     import flash.geom.Rectangle;
-    import flash.system.Capabilities;
     import flash.utils.ByteArray;
-    import flash.utils.getQualifiedClassName;
     
     import turkey.core.Turkey;
-    import turkey.display.Stage;
-    import turkey.errors.AbstractClassError;
     import turkey.errors.MissingContextError;
     import turkey.utils.TurkeyUtils;
     import turkey.utils.VertexData;

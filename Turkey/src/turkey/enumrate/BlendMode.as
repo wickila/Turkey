@@ -36,26 +36,14 @@ package turkey.enumrate
      */
     public class BlendMode
     {
-        private static var sBlendFactors:Array = [ 
-            // no premultiplied alpha
-            { 
-                "none"     : [ Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO ],
-                "normal"   : [ Context3DBlendFactor.SOURCE_ALPHA, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA ],
-                "add"      : [ Context3DBlendFactor.SOURCE_ALPHA, Context3DBlendFactor.DESTINATION_ALPHA ],
-                "multiply" : [ Context3DBlendFactor.DESTINATION_COLOR, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA ],
-                "screen"   : [ Context3DBlendFactor.SOURCE_ALPHA, Context3DBlendFactor.ONE ],
-                "erase"    : [ Context3DBlendFactor.ZERO, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA ]
-            },
-            // premultiplied alpha
-            { 
+        private static var sBlendFactors:Object = { 
                 "none"     : [ Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO ],
                 "normal"   : [ Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA ],
                 "add"      : [ Context3DBlendFactor.ONE, Context3DBlendFactor.ONE ],
                 "multiply" : [ Context3DBlendFactor.DESTINATION_COLOR, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA ],
                 "screen"   : [ Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_COLOR ],
                 "erase"    : [ Context3DBlendFactor.ZERO, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA ]
-            }
-        ];
+            };
         
         // predifined modes
         
@@ -90,22 +78,7 @@ package turkey.enumrate
          *  value. Throws an ArgumentError if the mode does not exist. */
         public static function getBlendFactors(mode:String, premultipliedAlpha:Boolean=true):Array
         {
-            var modes:Object = sBlendFactors[int(premultipliedAlpha)];
-            if (mode in modes) return modes[mode];
-            else throw new ArgumentError("Invalid blend mode");
-        }
-        
-        /** Registeres a blending mode under a certain name and for a certain premultiplied alpha
-         *  (pma) value. If the mode for the other pma value was not yet registered, the factors are
-         *  used for both pma settings. */
-        public static function register(name:String, sourceFactor:String, destFactor:String,
-                                        premultipliedAlpha:Boolean=true):void
-        {
-            var modes:Object = sBlendFactors[int(premultipliedAlpha)];
-            modes[name] = [sourceFactor, destFactor];
-            
-            var otherModes:Object = sBlendFactors[int(!premultipliedAlpha)];
-            if (!(name in otherModes)) otherModes[name] = [sourceFactor, destFactor];
+            return sBlendFactors[mode];
         }
     }
 }

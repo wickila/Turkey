@@ -14,7 +14,7 @@ package turkey.filters
 	{
 		private var _glowProgram:Program3D = null;
 		private var _addProgram:Program3D = null;
-		private var colorVector:Vector.<Number> = new <Number>[0, 0, 1, 1];
+		private var colorVector:Vector.<Number> = new Vector.<Number>(4,true);
 		private static const GlowFilter_CONSTANTS:Vector.<Number> = new <Number>[1, 1, 1, 1];
 		private static var tempTexture:TextureBase;
 		public function GlowFilter(color:uint,blurX:Number=1, blurY:Number=1, strength:Number = 0)

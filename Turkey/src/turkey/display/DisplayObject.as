@@ -4,8 +4,6 @@ package turkey.display
 	import flash.geom.Matrix3D;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	import flash.ui.Mouse;
-	import flash.ui.MouseCursor;
 	
 	import turkey.TurkeyRenderer;
 	import turkey.core.Turkey;
@@ -16,6 +14,23 @@ package turkey.display
 	import turkey.utils.MatrixUtil;
 	import turkey.utils.VertexData;
 	
+	[Event(name="turkeyClick", type="turkey.events.TurkeyMouseEvent")]
+	[Event(name="turkeyRightClick", type="turkey.events.TurkeyMouseEvent")]
+	[Event(name="turkeyMouseMove", type="turkey.events.TurkeyMouseEvent")]
+	[Event(name="turkeyMouseOver", type="turkey.events.TurkeyMouseEvent")]
+	[Event(name="turkeyMouseOut", type="turkey.events.TurkeyMouseEvent")]
+	[Event(name="turkeyMouseDown", type="turkey.events.TurkeyMouseEvent")]
+	[Event(name="turkeyMouseUp", type="turkey.events.TurkeyMouseEvent")]
+	[Event(name="turkeyRightMouseDown", type="turkey.events.TurkeyMouseEvent")]
+	[Event(name="turkeyRightMouseUp", type="turkey.events.TurkeyMouseEvent")]
+	/** Dispatched when an object is added to a parent. */
+	[Event(name="added", type="turkey.events.Event")]
+	/** Dispatched when an object is connected to the stage (directly or indirectly). */
+	[Event(name="addedToStage", type="turkey.events.Event")]
+	/** Dispatched when an object is removed from its parent. */
+	[Event(name="removed", type="turkey.events.Event")]
+	/** Dispatched when an object is removed from the stage and won't be rendered any longer. */ 
+	[Event(name="removedFromStage", type="turkey.events.Event")]
 	public class DisplayObject extends EventDispatcher
 	{
 		protected var _x:Number=0;
@@ -581,7 +596,7 @@ package turkey.display
 		 */		
 		public function addToRenderList(parentMatrix:Matrix,parentColorMatrix:Matrix3D,parentAlpha:Number,parentFilter:Boolean):void
 		{
-			if(!hasVisibleArea)return;
+//			if(!hasVisibleArea)return;
 			var hasFilter:Boolean = filters && filters.length>0;
 			if(hasFilter)
 			{
@@ -593,9 +608,10 @@ package turkey.display
 			if(hasFilter)
 			{
 				TurkeyRenderer.render();
-				for(var i:int=0;i<filters.length;i++)
+				var len:int = filters.length;
+				for(var i:int=0;i<len;i++)
 				{
-					filters[i].render((i==filters.length-1&&!parentFilter));
+					filters[i].render((i==len-1&&!parentFilter));
 				}
 				TurkeyRenderer.endFilter();
 			}

@@ -17,6 +17,7 @@ package
 	import turkey.filters.GlowFilter;
 	import turkey.filters.GrayFilter;
 	import turkey.filters.RadialBlurFilter;
+	import turkey.filters.SBlurFilter;
 	import turkey.textures.Texture;
 	
 	[SWF(width="1000",height="600",frameRate="60")]
@@ -28,7 +29,7 @@ package
 		private var _img:Image;
 		public function TestImage()
 		{
-			Turkey.init(stage);
+			Turkey.init(stage,0,0,0xffffffff);
 			Turkey.stage.addEventListener(TurkeyEvent.COMPLETE,__createComplete);
 		}
 		
@@ -53,7 +54,8 @@ package
 			var filter:RadialBlurFilter = new RadialBlurFilter(.5,.5,.005);
 			var grayFilter:GrayFilter = new GrayFilter();
 			var blurFilter:BlurFilter = new BlurFilter(3,3);
-			var glowFilter:GlowFilter = new GlowFilter(0xff0000,1,1,4);
+			var glowFilter:GlowFilter = new GlowFilter(0x0000ff,1,1,6);
+			var sFilter:SBlurFilter = new SBlurFilter();
 			var texture:Texture = Texture.fromBitmap(Bitmap(_loader.content));
 			var texture1:Texture = Texture.fromBitmap(Bitmap(_loader1.content));
 			var img:Image = new Image(texture);
@@ -64,12 +66,12 @@ package
 			img.buttonMode = true;
 //			img2.visible = false;
 //			img2.filters = [glowFilter];
-//			img.filters = [glowFilter];
+			img2.filters = [sFilter];
 			var sp:turkey.display.Sprite = new turkey.display.Sprite();
 			sp.mouseEnabled = false;
 			sp.addChild(img);
 			sp.addChild(img2);
-			sp.filters = [grayFilter];
+//			sp.filters = [grayFilter];
 			img.addEventListener(TurkeyMouseEvent.CLICK,onClick);
 			img.addEventListener(TurkeyMouseEvent.MOUSE_DOWN,onMouseDown);
 			img.addEventListener(TurkeyMouseEvent.MOUSE_UP,onMouseUp);
