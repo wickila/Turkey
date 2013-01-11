@@ -17,7 +17,6 @@ package
 	import turkey.filters.GlowFilter;
 	import turkey.filters.GrayFilter;
 	import turkey.filters.RadialBlurFilter;
-	import turkey.filters.SBlurFilter;
 	import turkey.textures.Texture;
 	
 	[SWF(width="1000",height="600",frameRate="60")]
@@ -46,31 +45,31 @@ package
 		{
 			_loader1 = new Loader();
 			_loader1.contentLoaderInfo.addEventListener(Event.COMPLETE,onTextureComplete1);
-			_loader1.load(new URLRequest("image.jpg"));
+			_loader1.load(new URLRequest("bird.jpg"));
 		}
 		
 		protected function onTextureComplete1(event:Event):void
 		{
 			var filter:RadialBlurFilter = new RadialBlurFilter(.5,.5,.005);
 			var grayFilter:GrayFilter = new GrayFilter();
-			var blurFilter:BlurFilter = new BlurFilter(3,3);
+			var blurFilter:BlurFilter = new BlurFilter(2,2);
 			var glowFilter:GlowFilter = new GlowFilter(0x0000ff,1,1,6);
-			var sFilter:SBlurFilter = new SBlurFilter();
 			var texture:Texture = Texture.fromBitmap(Bitmap(_loader.content));
 			var texture1:Texture = Texture.fromBitmap(Bitmap(_loader1.content));
 			var img:Image = new Image(texture);
 			var img2:Image = new Image(texture);
 			img2.y = 400;
-			img2.pivotX = 80;
-			img2.pivotY = img2.height/2;
+//			img2.pivotX = 80;
+//			img2.pivotY = img2.height/2;
 			img.buttonMode = true;
+//			img.filters = [blurFilter];
+			img.alpha = .5;
 //			img2.visible = false;
-//			img2.filters = [glowFilter];
-			img2.filters = [sFilter];
+			img2.filters = [glowFilter];
 			var sp:turkey.display.Sprite = new turkey.display.Sprite();
 			sp.mouseEnabled = false;
-			sp.addChild(img);
 			sp.addChild(img2);
+//			sp.addChild(img);
 //			sp.filters = [grayFilter];
 			img.addEventListener(TurkeyMouseEvent.CLICK,onClick);
 			img.addEventListener(TurkeyMouseEvent.MOUSE_DOWN,onMouseDown);

@@ -139,7 +139,7 @@ package turkey.filters
 		public function set blurX(value:Number):void
 		{
 			_blurX = value;
-			_paramsH[0] = _invW * _blurX * 4.;
+			_paramsH[0] = _invW * _blurX * 4;
 			_paramsH[2] = _invW * _blurX;
 		}
 		
@@ -147,7 +147,7 @@ package turkey.filters
 		public function set blurY(value:Number):void
 		{
 			_blurY = value;
-			_paramsV[1] = _invH * _blurY * 4.;
+			_paramsV[1] = _invH * _blurY * 4;
 			_paramsV[3] = _invH * _blurY;
 		}
 		

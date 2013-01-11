@@ -21,7 +21,6 @@ package turkey
 	{
 		private static var _textures:Vector.<TextureBase>=new Vector.<TextureBase>();
 		private static var _blendModes:Vector.<String> = new Vector.<String>();
-		private static var _vertices:Vector.<Number> = new Vector.<Number>();
 		private static var _vertexbuffer:VertexBuffer3D;
 		private static var _vertexData:Vector.<Number> = new Vector.<Number>();
 		private static var _indices:Vector.<uint> = new Vector.<uint>();
@@ -75,8 +74,8 @@ package turkey
 			}
 			
 			//reset
+			context3D.setVertexBufferAt(2, null);
 			_renderNum = _drawIndex = 0;
-			_vertices = new Vector.<Number>();
 			_indices = new Vector.<uint>();
 			_vertexData = new Vector.<Number>();
 			_drawIndexs = new Vector.<int>();

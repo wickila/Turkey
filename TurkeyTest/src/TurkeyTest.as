@@ -12,6 +12,7 @@ package
 	import turkey.display.MovieClip;
 	import turkey.events.TurkeyEvent;
 	import turkey.events.TurkeyMouseEvent;
+	import turkey.filters.Light;
 	import turkey.textures.Texture;
 	import turkey.textures.TextureAtlas;
 	
@@ -45,6 +46,7 @@ package
 		
 		protected function onDesComplete(event:Event):void
 		{
+			
 			var textureBody:Texture = Texture.fromBitmapData(Bitmap(_loader.content).bitmapData);//动画材质
 			_textureAlas = new TextureAtlas(textureBody,new XML(_urlLoader.data));//动画解析文件
 			var mc:MovieClip = new MovieClip(_textureAlas.getTextures("1005_stand"));
@@ -54,8 +56,10 @@ package
 			mc.x = mc.y = 200;
 			mc.pixelHit = true;
 //			Turkey.stage.addChild(mc);
-			
-			for(var i:int = 0;i<1000;i++)
+			var light:Light = new Light();
+			light.color = 0xffffffff;
+			Turkey.stage.filters = [light];
+			for(var i:int = 0;i<200;i++)
 			{
 				mc = new MovieClip(_textureAlas.getTextures("1005_stand"));
 				mc.addEventListener(TurkeyMouseEvent.CLICK,onClick);
@@ -70,7 +74,11 @@ package
 				Turkey.stage.addChild(mc);
 			}
 			
-			
+			addEventListener(Event.ENTER_FRAME,onEnterFrame);
+			function onEnterFrame(event:Event):void
+			{
+				light.setPosition(stage.mouseX,stage.mouseY);
+			}
 			function onClick(event:TurkeyMouseEvent):void
 			{
 				if(mc.playing)
