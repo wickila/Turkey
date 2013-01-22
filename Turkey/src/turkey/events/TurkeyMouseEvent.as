@@ -18,7 +18,10 @@ package turkey.events
 		public var localY:Number;
 		public var stageX:Number;
 		public var stageY:Number;
-		public function TurkeyMouseEvent(type:String, target:DisplayObject, localX:Number, localY:Number, stageX:Number, stageY:Number)
+		public var altKey:Boolean = false;
+		public var shiftKey:Boolean = false;
+		public var ctrKey:Boolean = false;
+		public function TurkeyMouseEvent(type:String, target:DisplayObject, localX:Number, localY:Number, stageX:Number, stageY:Number,altkey:Boolean=false,shiftKey:Boolean=false,ctrKey:Boolean=false)
 		{
 			super(type,true);
 			setTarget(target);
@@ -26,6 +29,9 @@ package turkey.events
 			this.localY = localY;
 			this.stageX = stageX;
 			this.stageY = stageY;
+			this.altKey = altKey;
+			this.shiftKey = shiftKey;
+			this.ctrKey = ctrKey;
 		}
 	}
 }

@@ -64,6 +64,7 @@ package turkey.display
 		private static var sAncestors:Vector.<DisplayObject> = new <DisplayObject>[];
 		private var sHelperMatrix:Matrix = new Matrix();
 		private var sHelperRectangle:Rectangle = new Rectangle();
+		protected static var _helpPoint:Point=new Point();
 		private var _matrixChanged:Boolean;
 		
 		public function DisplayObject()
@@ -387,17 +388,17 @@ package turkey.display
 			return base as Stage;
 		}
 		
-		public function localToGlobal(localPoint:Point, resultPoint:Point=null):Point
+		public function localToGlobal(localPoint:Point):Point
 		{
 			getTransformationMatrix(base, sHelperMatrix);
-			return MatrixUtil.transformCoords(sHelperMatrix, localPoint.x, localPoint.y, resultPoint);
+			return MatrixUtil.transformCoords(sHelperMatrix, localPoint.x, localPoint.y, _helpPoint);
 		}
 		
-		public function globalToLocal(globalPoint:Point, resultPoint:Point=null):Point
+		public function globalToLocal(globalPoint:Point):Point
 		{
 			getTransformationMatrix(base, sHelperMatrix);
 			sHelperMatrix.invert();
-			return MatrixUtil.transformCoords(sHelperMatrix, globalPoint.x, globalPoint.y, resultPoint);
+			return MatrixUtil.transformCoords(sHelperMatrix, globalPoint.x, globalPoint.y, _helpPoint);
 		}
 		
 		public function getTransformationMatrix(targetSpace:DisplayObject, 
@@ -576,7 +577,7 @@ package turkey.display
 		public function hitMouse(stageX:Number,stageY:Number):void
 		{
 			_stageMousePoint.setTo(stageX,stageY);
-			globalToLocal(_stageMousePoint,_localMousePoint);
+			globalToLocal(_stageMousePoint);_localMousePoint.setTo(_helpPoint.x,_helpPoint.y);
 			if(_mouseEnabled)
 			{
 				mouseOut = !hitTest(_localMousePoint,true);

@@ -103,6 +103,7 @@ package turkey.filters
 			Turkey.swapSceneTexture();
 			_context3D.setVertexBufferAt(0, _vertexBuffer1, 0, Context3DVertexBufferFormat.FLOAT_2);//x,y
 			_context3D.setVertexBufferAt(1, _vertexBuffer1, 2, Context3DVertexBufferFormat.FLOAT_2);//u,v
+			_context3D.setVertexBufferAt(2,null);
 			_context3D.setProgram(_program);
 			_context3D.setTextureAt(0, _texture0);
 			_context3D.setRenderToTexture(Turkey.sceneTexture);

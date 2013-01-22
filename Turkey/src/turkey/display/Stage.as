@@ -116,7 +116,7 @@ package turkey.display
 
 		private function onContext3DCrete(event:flash.events.Event):void
 		{
-			context3D = stage3D.context3D;
+			TurkeyRenderer.context3D = context3D = stage3D.context3D;
 			context3D.enableErrorChecking = Capabilities.isDebugger;
 			context3D.configureBackBuffer(stageWidth, stageHeight, 0, false);
 			stage2D.addEventListener(Event.ENTER_FRAME,onEnterFrame);
@@ -128,26 +128,26 @@ package turkey.display
 			var p:Point = new Point(event.stageX,event.stageY);
 			var target:DisplayObject = hitTest(p,true);
 			if(target == null)return;
-			target.globalToLocal(new Point(event.stageX,event.stageY),p);
-			target.dispatchEvent(getEventByType(event.type,target,p,event.stageX,event.stageY));
+			p = target.globalToLocal(new Point(event.stageX,event.stageY));
+			target.dispatchEvent(getEventByType(event.type,target,p,event.stageX,event.stageY,event.altKey,event.shiftKey,event.ctrlKey));
 		}
 		
-		private function getEventByType(type:String,target:DisplayObject,localPoint:Point,stageX:Number,stageY:Number):TurkeyMouseEvent
+		private function getEventByType(type:String,target:DisplayObject,localPoint:Point,stageX:Number,stageY:Number,altKey:Boolean,shiftKey:Boolean,ctrKey:Boolean):TurkeyMouseEvent
 		{
 			switch(type)
 			{
 				case MouseEvent.CLICK:
-					return new TurkeyMouseEvent(TurkeyMouseEvent.CLICK,target,localPoint.x,localPoint.y,stageX,stageY);
+					return new TurkeyMouseEvent(TurkeyMouseEvent.CLICK,target,localPoint.x,localPoint.y,stageX,stageY,altKey,shiftKey,ctrKey);
 				case MouseEvent.RIGHT_CLICK:
-					return new TurkeyMouseEvent(TurkeyMouseEvent.RIGHT_CLICK,target,localPoint.x,localPoint.y,stageX,stageY);
+					return new TurkeyMouseEvent(TurkeyMouseEvent.RIGHT_CLICK,target,localPoint.x,localPoint.y,stageX,stageY,altKey,shiftKey,ctrKey);
 				case MouseEvent.MOUSE_DOWN:
-					return new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_DOWN,target,localPoint.x,localPoint.y,stageX,stageY);
+					return new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_DOWN,target,localPoint.x,localPoint.y,stageX,stageY,altKey,shiftKey,ctrKey);
 				case MouseEvent.RIGHT_MOUSE_DOWN:
-					return new TurkeyMouseEvent(TurkeyMouseEvent.RIGHT_MOUSE_DOWN,target,localPoint.x,localPoint.y,stageX,stageY);
+					return new TurkeyMouseEvent(TurkeyMouseEvent.RIGHT_MOUSE_DOWN,target,localPoint.x,localPoint.y,stageX,stageY,altKey,shiftKey,ctrKey);
 				case MouseEvent.MOUSE_UP:
-					return new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_UP,target,localPoint.x,localPoint.y,stageX,stageY);
+					return new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_UP,target,localPoint.x,localPoint.y,stageX,stageY,altKey,shiftKey,ctrKey);
 				case MouseEvent.RIGHT_MOUSE_UP:
-					return new TurkeyMouseEvent(TurkeyMouseEvent.RIGHT_MOUSE_UP,target,localPoint.x,localPoint.y,stageX,stageY);
+					return new TurkeyMouseEvent(TurkeyMouseEvent.RIGHT_MOUSE_UP,target,localPoint.x,localPoint.y,stageX,stageY,altKey,shiftKey,ctrKey);
 			}
 			return null;
 		}
@@ -157,7 +157,7 @@ package turkey.display
 			var p:Point = new Point(event.stageX,event.stageY);
 			var target:DisplayObject = hitTest(p,true);
 			if(target==null)return;
-			target.globalToLocal(new Point(event.stageX,event.stageY),p);
+			p = target.globalToLocal(new Point(event.stageX,event.stageY));
 			target.dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_MOVE,target,p.x,p.y,event.stageX,event.stageY));
 		}
 

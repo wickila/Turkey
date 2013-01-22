@@ -12,31 +12,20 @@ package turkey.display
 		protected var _textures:Vector.<Texture>;
 		protected var _index:int=0;
 		protected var _totalFrame:int;
-		protected var _playing:Boolean=true;
+		protected var _playing:Boolean=false;
 		public function MovieClip(textures:Vector.<Texture>)
 		{
 			super(textures[0]);
 			_textures = textures;
 			_totalFrame = _textures.length;
-			initEvents();
 		}
 		
 		public function get playing():Boolean
 		{
 			return _playing;
 		}
-
-		protected function initEvents():void
-		{
-			Turkey.stage.stage2D.addEventListener(Event.ENTER_FRAME,onEnterFrame);
-		}
 		
-		private function onEnterFrame(event:Event):void
-		{
-			update();
-		}
-		
-		protected function update():void
+		protected function onEnterFrame(event:Event):void
 		{
 			_index = (_index+1)%_totalFrame;
 			texture = _textures[_index];
@@ -64,6 +53,7 @@ package turkey.display
 		
 		public function play():void
 		{
+			if(_playing)return;
 			_playing = true;
 			Turkey.stage.stage2D.addEventListener(Event.ENTER_FRAME,onEnterFrame);
 		}

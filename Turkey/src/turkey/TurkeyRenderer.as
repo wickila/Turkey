@@ -4,7 +4,6 @@ package turkey
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.IndexBuffer3D;
-	import flash.display3D.Program3D;
 	import flash.display3D.VertexBuffer3D;
 	import flash.display3D.textures.TextureBase;
 	import flash.geom.Matrix;
@@ -25,7 +24,8 @@ package turkey
 		private static var _vertexData:Vector.<Number> = new Vector.<Number>();
 		private static var _indices:Vector.<uint> = new Vector.<uint>();
 		private static var _indexBuffer:IndexBuffer3D;
-		private static var _program:Program3D;
+		
+		public static var context3D:Context3D;
 		
 		private static var _renderNum:uint=0;
 		
@@ -35,7 +35,7 @@ package turkey
 		private static var _currentBlendMode:String = null;
 		private static var _colorSourceHelperVector:Vector.<Number> = new <Number>[1,1,1];
 		private static var _colorHelperVector:Vector.<Number> = new Vector.<Number>(3);
-		private static var _colorAlphaHelperVector:Vector3D = new Vector3D;
+		private static var _colorAlphaHelperVector:Vector3D = new Vector3D();
 		
 		public function TurkeyRenderer()
 		{
@@ -49,7 +49,6 @@ package turkey
 		{
 			if(_renderNum<1)return;
 			//rebuildBuffer
-			var context3D:Context3D = Turkey.stage.context3D;
 			_vertexbuffer && _vertexbuffer.dispose();
 			_indexBuffer && _indexBuffer.dispose();
 			_vertexbuffer = context3D.createVertexBuffer(_renderNum<<2,VertexData.ELEMENTS_PER_VERTEX);
@@ -69,12 +68,10 @@ package turkey
 				var arr:Array = BlendMode.getBlendFactors(_blendModes[i]);
 				context3D.setBlendFactors(arr[0],arr[1]);
 				context3D.setTextureAt(0, _textures[i]);
-				var num:int = (i==len-1)?(_renderNum-_drawIndex):(_drawIndexs[i+1]-_drawIndex);
-				context3D.drawTriangles(_indexBuffer,_drawIndex*6,num<<1);
+				context3D.drawTriangles(_indexBuffer,_drawIndex*6,((i==len-1)?(_renderNum-_drawIndex):(_drawIndexs[i+1]-_drawIndex))<<1);
 			}
 			
 			//reset
-			context3D.setVertexBufferAt(2, null);
 			_renderNum = _drawIndex = 0;
 			_indices = new Vector.<uint>();
 			_vertexData = new Vector.<Number>();
@@ -121,15 +118,14 @@ package turkey
 			var r:Number = _colorHelperVector[0];
 			var g:Number = _colorHelperVector[1];
 			var b:Number = _colorHelperVector[2];
-			var m:int;
-			var l:int;
+			var m:int,l:int,x:Number,y:Number=0;
 			var i:int = _renderNum<<5;//_renderNum * 4 * 8,4个顶点，每个顶点8个数据:x,y,r,g,b,a,u,v
-			for (var j:int=0; j<4; ++j)//此for循环里面做了四件事，1，把显示对象的顶点数据加入到渲染队列里面。2，设置顶点数据的空间坐标。3,设置顶点坐标的颜色值 4，设置顶点坐标的alpha颜色值 (_vertexData.append(child.vertexData);_vertexData.transformVertex(i*4,matrix,4);_vertexData.setAlpha(_renderNum*4,parentAlpha);
+			for(var j:int=0;j<4;j++)//此for循环里面做了四件事，1，把显示对象的顶点数据加入到渲染队列里面。2，设置顶点数据的空间坐标。3,设置顶点坐标的颜色值 4，设置顶点坐标的alpha颜色值 (_vertexData.append(child.vertexData);_vertexData.transformVertex(i*4,matrix,4);_vertexData.setAlpha(_renderNum*4,parentAlpha);
 			{
 				m = j<<3;//j*8
 				l = i+m;
-				var x:Number = raw[m];
-				var y:Number = raw[m+1];
+				x = raw[m];
+				y = raw[m+1];
 				_vertexData[l]   = matrix.a * x + matrix.c * y + matrix.tx;//x
 				_vertexData[l+1] = matrix.d * y + matrix.b * x + matrix.ty;//y
 				_vertexData[l+2] = r;//r

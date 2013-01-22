@@ -128,9 +128,6 @@ package turkey.textures
             var legalHeight:int = TurkeyUtils.getNextPowerOfTwo(origHeight);
             var context:Context3D = Turkey.stage.context3D;
             var potData:BitmapData;
-            
-            if (context == null) throw new MissingContextError();
-            
             var nativeTexture:flash.display3D.textures.Texture = context.createTexture(
                 legalWidth, legalHeight, Context3DTextureFormat.BGRA, optimizeForRenderTexture);
             
@@ -140,9 +137,7 @@ package turkey.textures
                 potData.copyPixels(data, data.rect, sOrigin);
                 data = potData;
             }
-            
             uploadBitmapData(nativeTexture, data, generateMipMaps);
-            
             var concreteTexture:ConcreteTexture = new ConcreteTexture(data,
                 nativeTexture, Context3DTextureFormat.BGRA, legalWidth, legalHeight,
                 generateMipMaps, true, optimizeForRenderTexture, scale);
