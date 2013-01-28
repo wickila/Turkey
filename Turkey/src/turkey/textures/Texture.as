@@ -109,7 +109,7 @@ package turkey.textures
         
         /** Creates a texture object from a bitmap.
          *  Beware: you must not dispose 'data' if Starling should handle a lost device context. */
-        public static function fromBitmap(data:Bitmap, generateMipMaps:Boolean=true,
+        public static function fromBitmap(data:Bitmap, generateMipMaps:Boolean=false,
                                           optimizeForRenderTexture:Boolean=false,
                                           scale:Number=1):Texture
         {
@@ -118,7 +118,7 @@ package turkey.textures
         
         /** Creates a texture from bitmap data. 
          *  Beware: you must not dispose 'data' if Starling should handle a lost device context. */
-        public static function fromBitmapData(data:BitmapData, generateMipMaps:Boolean=true,
+        public static function fromBitmapData(data:BitmapData, generateMipMaps:Boolean=false,
                                               optimizeForRenderTexture:Boolean=false,
                                               scale:Number=1):Texture
         {

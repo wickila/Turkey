@@ -164,8 +164,7 @@ package turkey.display
         override public function hitTest(localPoint:Point,forMouse:Boolean=false):DisplayObject
         {
             // locations outside of the stage area shouldn't be accepted
-            if (localPoint.x < 0 || localPoint.x > stageWidth ||
-                localPoint.y < 0 || localPoint.y > stageHeight)
+            if (localPoint.x < 0 || localPoint.x > stageWidth ||localPoint.y < 0 || localPoint.y > stageHeight)
                 return null;
             
             // if nothing else is hit, the stage returns itself as target
