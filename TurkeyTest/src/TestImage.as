@@ -59,6 +59,7 @@ package
 			var img:Image = new Image(texture);
 			var img2:Image = new Image(texture);
 			img2.y = 400;
+//			img2.scaleX = img2.scaleY = .5;
 //			img2.pivotX = 80;
 //			img2.pivotY = img2.height/2;
 			img.buttonMode = true;
@@ -69,6 +70,7 @@ package
 			var sp:turkey.display.Sprite = new turkey.display.Sprite();
 			sp.mouseEnabled = false;
 			sp.addChild(img2);
+			sp.scaleX = sp.scaleY = .5;
 //			sp.addChild(img);
 //			sp.filters = [grayFilter];
 			img.addEventListener(TurkeyMouseEvent.CLICK,onClick);
@@ -77,7 +79,7 @@ package
 			sp.addEventListener(TurkeyMouseEvent.CLICK,onClick);
 			stage.addEventListener(MouseEvent.CLICK,onStageClick);
 			Turkey.stage.addChild(sp);
-			addEventListener(Event.ENTER_FRAME,onEnterFrame);
+//			addEventListener(Event.ENTER_FRAME,onEnterFrame);
 			var dir:int=1;
 			function onEnterFrame(event2:Event):void
 			{

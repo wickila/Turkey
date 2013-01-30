@@ -603,7 +603,8 @@ package turkey.display
 			{
 				TurkeyRenderer.preFilter();
 			}
-			MatrixUtil.prependMatrix(parentMatrix,transformationMatrix);
+			parentMatrix.concat(transformationMatrix);
+//			MatrixUtil.prependMatrix(parentMatrix,transformationMatrix);
 			parentColorMatrix.append(_colorMatrix);
 			TurkeyRenderer.addChildForRender(this,parentMatrix,parentColorMatrix,parentAlpha*alpha);
 			if(hasFilter)

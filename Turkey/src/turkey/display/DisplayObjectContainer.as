@@ -273,7 +273,7 @@ package turkey.display
 			}
 			var num:int = numChildren;
 			var a:Number = parentAlpha*alpha;
-			parentMatrix.concat(transformationMatrix);
+			MatrixUtil.prependMatrix(parentMatrix,transformationMatrix);
 			parentColorMatrix.append(colorMatrix);
 			for(var i:int=0;i<num;i++)
 			{
