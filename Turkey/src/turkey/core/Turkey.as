@@ -11,7 +11,6 @@ package turkey.core
 	
 	import turkey.display.Image;
 	import turkey.display.Stage;
-	import turkey.enumrate.BlendMode;
 	import turkey.events.EventDispatcher;
 	import turkey.events.TurkeyEvent;
 	import turkey.utils.TurkeyUtils;

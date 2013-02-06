@@ -37,7 +37,7 @@ package turkey.textures
         public function SubTexture(parentTexture:Texture, region:Rectangle,
                                    ownsParent:Boolean=false)
         {
-			super(parentTexture.bitmapData);
+			super();
             mParent = parentTexture;
             mOwnsParent = ownsParent;
             

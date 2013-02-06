@@ -64,14 +64,6 @@ package turkey.display
 			Turkey.stage.stage2D.removeEventListener(Event.ENTER_FRAME,onEnterFrame);
 		}
 		
-		override public function hitTest(localPoint:Point, forMouse:Boolean=false):DisplayObject
-		{
-				if (forMouse && (!visible||!mouseEnabled))return null;
-				if(!_pixelHit)return super.hitTest(localPoint,forMouse);
-				getBounds(this,_selfBounds);
-				return (_selfBounds.contains(localPoint.x,localPoint.y) && (_bitmapdata.getPixel32(int(localPoint.x + _texture.frame.x + _texture.showRect.x),int(localPoint.y + _texture.frame.y + _texture.showRect.y))&0xff000000)!=0)?this:null;
-		}
-		
 		public override function getBounds(targetSpace:DisplayObject, resultRect:Rectangle=null):Rectangle
 		{
 			if (resultRect == null) resultRect = new Rectangle();

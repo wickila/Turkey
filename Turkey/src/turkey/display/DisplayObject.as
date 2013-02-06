@@ -56,7 +56,6 @@ package turkey.display
 		protected var _parent:DisplayObjectContainer;
 		protected var _filters:Array;
 		protected var _transformationMatrix:Matrix;
-		protected var _pixelHit:Boolean=false;
 		private var _mouseOut:Boolean = true;
 		protected var _selfBounds:Rectangle = new Rectangle();
 		
@@ -243,20 +242,6 @@ package turkey.display
 		public function set blendMode(value:String):void
 		{
 			_blendMode = value;
-		}
-		/**
-		 * 
-		 * @return 是否进行像素级别的精确碰撞，如果为false，则只与显示矩形碰撞
-		 * 
-		 */		
-		public function get pixelHit():Boolean
-		{
-			return _pixelHit;
-		}
-		
-		public function set pixelHit(value:Boolean):void
-		{
-			_pixelHit = value;
 		}
 		
 		public function get buttonMode():Boolean
@@ -603,8 +588,7 @@ package turkey.display
 			{
 				TurkeyRenderer.preFilter();
 			}
-			parentMatrix.concat(transformationMatrix);
-//			MatrixUtil.prependMatrix(parentMatrix,transformationMatrix);
+			MatrixUtil.prependMatrix(parentMatrix,transformationMatrix);
 			parentColorMatrix.append(_colorMatrix);
 			TurkeyRenderer.addChildForRender(this,parentMatrix,parentColorMatrix,parentAlpha*alpha);
 			if(hasFilter)

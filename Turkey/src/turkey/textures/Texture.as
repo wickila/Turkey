@@ -83,16 +83,13 @@ package turkey.textures
         private var mFrame:Rectangle;
 		protected var _showRect:Rectangle;
         private var mRepeat:Boolean;
-		private var _bitmapData:BitmapData;
         
         /** helper object */
         private static var sOrigin:Point = new Point();
         
         /** @private */
-        public function Texture(bitmapData:BitmapData)
+        public function Texture()
         {
-            _bitmapData = bitmapData;
-			_showRect = new Rectangle(0,0,bitmapData.width,bitmapData.height);
             mRepeat = false;
         }
         
@@ -102,9 +99,20 @@ package turkey.textures
             // override in subclasses
         }
 		
-		public function get bitmapData():BitmapData
+		public static function fromAtfData(data:ByteArray, scale:Number=1, 
+										   useMipMaps:Boolean=true):Texture
 		{
-			return _bitmapData;
+			var context:Context3D = Turkey.stage.context3D;
+			var atfData:AtfData = new AtfData(data);
+			var nativeTexture:flash.display3D.textures.Texture = context.createTexture(
+				atfData.width, atfData.height, atfData.format, false);
+			
+			uploadAtfData(nativeTexture, data);
+			
+			var concreteTexture:ConcreteTexture = new ConcreteTexture(nativeTexture, atfData.format, 
+				atfData.width, atfData.height, useMipMaps && atfData.numTextures > 1, 
+				false, false, scale);
+			return concreteTexture;
 		}
         
         /** Creates a texture object from a bitmap.
@@ -122,31 +130,36 @@ package turkey.textures
                                               optimizeForRenderTexture:Boolean=false,
                                               scale:Number=1):Texture
         {
-            var origWidth:int   = data.width;
-            var origHeight:int  = data.height;
-            var legalWidth:int  = TurkeyUtils.getNextPowerOfTwo(origWidth);
-            var legalHeight:int = TurkeyUtils.getNextPowerOfTwo(origHeight);
-            var context:Context3D = Turkey.stage.context3D;
-            var potData:BitmapData;
-            var nativeTexture:flash.display3D.textures.Texture = context.createTexture(
-                legalWidth, legalHeight, Context3DTextureFormat.BGRA, optimizeForRenderTexture);
-            
-            if (legalWidth > origWidth || legalHeight > origHeight)
-            {
-                potData = new BitmapData(legalWidth, legalHeight, true, 0);
-                potData.copyPixels(data, data.rect, sOrigin);
-                data = potData;
-            }
-            uploadBitmapData(nativeTexture, data, generateMipMaps);
-            var concreteTexture:ConcreteTexture = new ConcreteTexture(data,
-                nativeTexture, Context3DTextureFormat.BGRA, legalWidth, legalHeight,
-                generateMipMaps, true, optimizeForRenderTexture, scale);
-            if (origWidth == legalWidth && origHeight == legalHeight)
-                return concreteTexture;
-            else
-                return new SubTexture(concreteTexture, 
-                                      new Rectangle(0, 0, origWidth/scale, origHeight/scale), 
-                                      true);
+			var origWidth:int   = data.width;
+			var origHeight:int  = data.height;
+			var legalWidth:int  = TurkeyUtils.getNextPowerOfTwo(origWidth);
+			var legalHeight:int = TurkeyUtils.getNextPowerOfTwo(origHeight);
+			var context:Context3D = Turkey.stage.context3D;
+			var potData:BitmapData;
+			
+			var nativeTexture:flash.display3D.textures.Texture = context.createTexture(
+				legalWidth, legalHeight, Context3DTextureFormat.BGRA, optimizeForRenderTexture);
+			
+			if (legalWidth > origWidth || legalHeight > origHeight)
+			{
+				potData = new BitmapData(legalWidth, legalHeight, true, 0);
+				potData.copyPixels(data, data.rect, sOrigin);
+				data = potData;
+			}
+			uploadBitmapData(nativeTexture, data, generateMipMaps);
+			var concreteTexture:ConcreteTexture = new ConcreteTexture(
+				nativeTexture, Context3DTextureFormat.BGRA, legalWidth, legalHeight,
+				generateMipMaps, true, optimizeForRenderTexture, scale);
+			
+			if(potData)
+				potData.dispose();
+			
+			if (origWidth == legalWidth && origHeight == legalHeight)
+				return concreteTexture;
+			else
+				return new SubTexture(concreteTexture, 
+					new Rectangle(0, 0, origWidth/scale, origHeight/scale), 
+					true);
         }
         
         /** Creates an empty texture of a certain size and color. The color parameter
@@ -271,10 +284,5 @@ package turkey.textures
         
         /** Indicates if the alpha values are premultiplied into the RGB values. */
         public function get premultipliedAlpha():Boolean { return false; }
-		
-		public function get showRect():Rectangle
-		{
-			return _showRect;
-		}
     }
 }

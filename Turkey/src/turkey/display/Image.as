@@ -11,7 +11,6 @@ package turkey.display
 	public class Image extends Quad
 	{
 		protected var _texture:Texture;
-		protected var _bitmapdata:BitmapData;
 		private var _vertexDataCache:VertexData;
 		protected var _vertexDataChanged:Boolean;
 		
@@ -31,7 +30,6 @@ package turkey.display
 				_vertexData.setTexCoords(1, 1.0, 0.0);
 				_vertexData.setTexCoords(2, 0.0, 1.0);
 				_vertexData.setTexCoords(3, 1.0, 1.0);
-				_bitmapdata = _texture.bitmapData;
 				_vertexDataCache = new VertexData(4);
 				_vertexDataChanged = true;
 			}
@@ -44,15 +42,13 @@ package turkey.display
 		public function set texture(value:Texture):void
 		{
 			_texture = value;
-			_bitmapdata = _texture.bitmapData;
 			_vertexDataChanged = true;
 		}
 
 		override public function hitTest(localPoint:Point, forMouse:Boolean=false):DisplayObject
 		{
 			if (forMouse && (!visible||!mouseEnabled))return null;
-			if(!_pixelHit)return super.hitTest(localPoint,forMouse);
-			return (_bitmapdata.getPixel32(localPoint.x,localPoint.y)&0xff000000)!=0?this:null;
+			return super.hitTest(localPoint,forMouse);
 		}
 		
 		public override function getBounds(targetSpace:DisplayObject, resultRect:Rectangle=null):Rectangle
@@ -61,9 +57,8 @@ package turkey.display
 			
 			if (targetSpace == this) // optimization
 			{
-				vertexData.getPosition(0,sHelperPoint);var rx:int = sHelperPoint.x;var ry:int = sHelperPoint.y;
 				vertexData.getPosition(3, sHelperPoint);
-				resultRect.setTo(rx, ry, sHelperPoint.x, sHelperPoint.y);
+				resultRect.setTo(0, 0, sHelperPoint.x, sHelperPoint.y);
 			}else if (targetSpace == parent && rotation == 0.0) // optimization
 			{
 				var scaleX:Number = this.scaleX;
@@ -113,7 +108,6 @@ package turkey.display
 		{
 			super.dispose();
 			_texture = null;
-			_bitmapdata = null;
 			_vertexDataCache = null;
 		}
 	}
