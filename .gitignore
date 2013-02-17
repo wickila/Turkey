@@ -165,7 +165,10 @@ pip-log.txt
 #Actionscript
 .flexLibProperties
 .actionScriptProperties
+.flexProperties
 
 Enviroment
 EnviromentTest
 FireTest
+Particle
+Starling

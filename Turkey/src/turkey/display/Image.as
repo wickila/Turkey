@@ -51,6 +51,19 @@ package turkey.display
 			return super.hitTest(localPoint,forMouse);
 		}
 		
+		public function setTexCoords(vertexID:int, coords:Point):void
+		{
+			_vertexData.setTexCoords(vertexID, coords.x, coords.y);
+			_vertexDataChanged = true;
+		}
+		
+		public function getTexCoords(vertexID:int, resultPoint:Point=null):Point
+		{
+			if (resultPoint == null) resultPoint = new Point();
+			_vertexData.getTexCoords(vertexID, resultPoint);
+			return resultPoint;
+		}
+		
 		public override function getBounds(targetSpace:DisplayObject, resultRect:Rectangle=null):Rectangle
 		{
 			if (resultRect == null) resultRect = new Rectangle();

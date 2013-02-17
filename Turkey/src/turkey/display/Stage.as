@@ -33,7 +33,6 @@ package turkey.display
 		public var flashMatrix:Matrix3D;
 		public var buttomMouse:String = MouseCursor.BUTTON;
 		public var autoMouse:String = MouseCursor.AUTO;
-//        private var mEnterFrameEvent:TurkeyEnterFrameEvent = new TurkeyEnterFrameEvent(TurkeyEvent.ENTER_FRAME, 0.0);
 		private var _time:uint;
 		private var _frameRate:int;
 		private var _mouseMoveEnable:Boolean = false;
@@ -79,9 +78,6 @@ package turkey.display
 		
 		protected function onEnterFrame(event:Event):void
 		{
-			//			mEnterFrameEvent.reset(TurkeyEvent.ENTER_FRAME, false, getTimer()-_time);
-			//			_time = getTimer();
-			//			broadcastEvent(mEnterFrameEvent);
 			BUTTON_MODE = false;
 			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
 			addToRenderList(_transformationMatrix,_colorMatrix,1,false);

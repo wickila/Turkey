@@ -1,0 +1,738 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="creationCompleteHandler(event)" backgroundAlpha="0" fontFamily="宋体" frameRate="60">
+	<fx:Script>
+		<![CDATA[
+			import flash.display3D.Context3DBlendFactor;
+			import flash.utils.ByteArray;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.graphics.codec.PNGEncoder;
+			
+			import spark.events.IndexChangeEvent;
+			
+			import turkey.core.Turkey;
+			import turkey.events.TurkeyEvent;
+			import turkey.events.TurkeyMouseEvent;
+			import turkey.particle.ColorArgb;
+			import turkey.particle.PDParticleSystem;
+			import turkey.textures.Texture;
+			import turkey.utils.deg2rad;
+			
+			[Bindable]
+			private var BLENDS:ArrayCollection = new ArrayCollection([
+				{"label":Context3DBlendFactor.ZERO,"data":0},
+				{"label":Context3DBlendFactor.ONE,"data":1},
+				{"label":Context3DBlendFactor.SOURCE_COLOR,"data":0x300},
+				{"label":Context3DBlendFactor.ONE_MINUS_SOURCE_COLOR,"data":0x301},
+				{"label":Context3DBlendFactor.SOURCE_ALPHA,"data":0x302},
+				{"label":Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA,"data":0x303},
+				{"label":Context3DBlendFactor.DESTINATION_ALPHA,"data":0x304},
+				{"label":Context3DBlendFactor.ONE_MINUS_DESTINATION_ALPHA,"data":0x305},
+				{"label":Context3DBlendFactor.DESTINATION_COLOR,"data":0x306},
+				{"label":Context3DBlendFactor.ONE_MINUS_DESTINATION_COLOR,"data":0x307}
+			]);
+			
+			[Bindable]
+			private var EMITTER_TYPES:ArrayCollection = new ArrayCollection([
+				{"label":"重力发射器","data":0},
+				{"label":"射线发射器","data":1}
+			]);
+			
+			[Bindable]
+			private var TEXTURES:ArrayCollection = new ArrayCollection([
+				{"label":"圆形粒子","data":"circle"},
+				{"label":"自定义粒子","data":"custom"}
+			]);
+			
+			[Bindable]
+			private var mEmitterType:int=0;
+			[Bindable]
+			private var mEmitterX:Number = 500;
+			[Bindable]
+			private var mEmitterY:Number = 300;
+			[Bindable]
+			private var mEmitterXVariance:Number=0;
+			[Bindable]
+			private var mEmitterYVariance:Number=0;
+			[Bindable]
+			private var mSpeed:Number = 100;
+			[Bindable]
+			private var mSpeedVariance:Number = 30;
+			[Bindable]
+			private var mLifespan:Number = 2;
+			[Bindable]
+			private var mLifespanVariance:Number = 2;
+			[Bindable]
+			private var mEmitAngle:Number = 270;
+			[Bindable]
+			private var mEmitAngleVariance:Number=0;
+			[Bindable]
+			private var mGravityX:Number=0;
+			[Bindable]
+			private var mGravityY:Number=0;
+			[Bindable]
+			private var mRadialAcceleration:Number = 0;
+			[Bindable]
+			private var mRadialAccelerationVariance:Number = 0;
+			[Bindable]
+			private var mTangentialAcceleration:Number = 0;
+			[Bindable]
+			private var mTangentialAccelerationVariance:Number = 0;
+			[Bindable]
+			private var mStartColorRed:Number = 1.0;
+			[Bindable]
+			private var mStartColorGreen:Number = 0.3;
+			[Bindable]
+			private var mStartColorBlue:Number = 0;
+			[Bindable]
+			private var mStartColorAlpha:Number = 1;
+			[Bindable]
+			private var mStartColorRedVariance:Number = 0;
+			[Bindable]
+			private var mStartColorGreenVariance:Number = 0;
+			[Bindable]
+			private var mStartColorBlueVariance:Number = 0;
+			[Bindable]
+			private var mStartColorAlphaVariance:Number = 0;
+			[Bindable]
+			private var mFinishColorRed:Number = 1.0;
+			[Bindable]
+			private var mFinishColorGreen:Number = 0.3;
+			[Bindable]
+			private var mFinishColorBlue:Number = 0;
+			[Bindable]
+			private var mFinishColorAlpha:Number = 0;
+			[Bindable]
+			private var mFinishColorRedVariance:Number = 0;
+			[Bindable]
+			private var mFinishColorGreenVariance:Number = 0;
+			[Bindable]
+			private var mFinishColorBlueVariance:Number = 0;
+			[Bindable]
+			private var mFinishColorAlphaVariance:Number = 0;
+			[Bindable]
+			private var mMaxNumParticles:int=500;
+			[Bindable]
+			private var mStartSize:Number = 70;
+			[Bindable]
+			private var mStartSizeVariance:Number=50;
+			[Bindable]
+			private var mEndSize:Number = 0;
+			[Bindable]
+			private var mEndSizeVariance:Number = 0;
+			[Bindable]
+			private var mStartRotation:Number = 0;
+			[Bindable]
+			private var mStartRotationVariance:Number = 0;
+			[Bindable]
+			private var mEndRotation:Number = 0;
+			[Bindable]
+			private var mEndRotationVariance:Number = 0;
+			[Bindable]
+			private var mMaxRadius:Number = 100;
+			[Bindable]
+			private var mMaxRadiusVariance:Number = 0;
+			[Bindable]
+			private var mMinRadius:Number = 0;
+			[Bindable]
+			private var mRotatePerSecond:Number = 0;
+			[Bindable]
+			private var mRotatePerSecondVariance:Number = 0;
+			[Bindable]
+			protected var mBlendFactorSource:uint=0x302;
+			[Bindable]
+			protected var mBlendFactorDestination:uint=1;
+			
+			
+			private var particelSystem:PDParticleSystem;
+			private var circle:Texture;
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				this.nativeWindow.maximize();
+				nativeWindow.addEventListener(NativeWindowBoundsEvent.RESIZE,onMaximize);
+			}
+			
+			private function onTurkeyComplete(event:TurkeyEvent):void
+			{
+				var sp:Sprite = new Sprite();
+				var shape:Shape = new Shape();
+				var mt:Matrix = new Matrix();
+				var size:int=16;
+				mt.createGradientBox(size<<1,size<<1);
+				mt.translate(-size,-size);
+				shape.graphics.beginGradientFill(GradientType.RADIAL,[0xffffff,0],[1,1],[0,255],mt);
+				shape.graphics.drawCircle(0,0,size);
+				shape.graphics.endFill();
+				sp.addChild(shape);
+				shape.x = shape.y = size;
+				circleBmd = new BitmapData(size<<1, size<<1, true, 0x00000000);
+				circleBmd.draw(sp);
+				circle = Texture.fromBitmapData(circleBmd);
+				particelSystem = new PDParticleSystem(getXml(),circle);
+				particelSystem.start();
+				Turkey.stage.addChild(particelSystem);
+				Turkey.stage.addEventListener(TurkeyMouseEvent.MOUSE_DOWN,onMouseDown);
+				stage.addEventListener(MouseEvent.MOUSE_UP,onMouseUp);
+			}
+			
+			protected function onMaximize(event:NativeWindowBoundsEvent):void
+			{
+				nativeWindow.removeEventListener(NativeWindowBoundsEvent.RESIZE,onMaximize);
+				Turkey.init(this.stage,1000,this.height);
+				Turkey.stage.addEventListener(TurkeyEvent.COMPLETE,onTurkeyComplete);
+			}
+			
+			private function getXml():XML
+			{
+				var xmlString:String = '<particleEmitterConfig>'+
+										  '<texture name="'+getParticleName()+'"/>'+
+										  '<sourcePosition x="'+mEmitterX+'" y="'+mEmitterY+'"/>'+
+										  '<sourcePositionVariance x="'+mEmitterXVariance+'" y="'+mEmitterYVariance+'"/>'+
+										  '<speed value="'+mSpeed+'"/>'+
+										  '<speedVariance value="'+mSpeedVariance+'"/>'+
+										  '<particleLifeSpan value="'+mLifespan+'"/>'+
+										  '<particleLifespanVariance value="'+mLifespanVariance+'"/>'+
+										  '<angle value="'+mEmitAngle+'"/>'+
+										  '<angleVariance value="'+mEmitAngleVariance+'"/>'+
+										  '<gravity x="'+mGravityX+'" y="'+mGravityY+'"/>'+
+										  '<radialAcceleration value="'+mRadialAcceleration+'"/>'+
+										  '<tangentialAcceleration value="'+mTangentialAcceleration+'"/>'+
+										  '<radialAccelVariance value="'+mRadialAccelerationVariance+'"/>'+
+										  '<tangentialAccelVariance value="'+mTangentialAccelerationVariance+'"/>'+
+										  '<startColor red="'+mStartColorRed+'" green="'+mStartColorGreen+'" blue="'+mStartColorBlue+'" alpha="'+mStartColorAlpha+'"/>'+
+										  '<startColorVariance red="'+mStartColorRedVariance+'" green="'+mStartColorGreenVariance+'" blue="'+mStartColorBlueVariance+'" alpha="'+mStartColorAlphaVariance+'"/>'+
+										  '<finishColor red="'+mFinishColorRed+'" green="'+mFinishColorGreen+'" blue="'+mFinishColorBlue+'" alpha="'+mFinishColorAlpha+'"/>'+
+										  '<finishColorVariance red="'+mFinishColorRedVariance+'" green="'+mFinishColorGreenVariance+'" blue="'+mFinishColorBlueVariance+'" alpha="'+mFinishColorAlphaVariance+'"/>'+
+										  '<maxParticles value="'+mMaxNumParticles+'"/>'+
+										  '<startParticleSize value="'+mStartSize+'"/>'+
+										  '<startParticleSizeVariance value="'+mStartSizeVariance+'"/>'+
+										  '<finishParticleSize value="'+mEndSize+'"/>'+
+										  '<FinishParticleSizeVariance value="'+mEndSizeVariance+'"/>'+
+										  '<emitterType value="0"/>'+
+										  '<maxRadius value="'+mMaxRadius+'"/>'+
+										  '<maxRadiusVariance value="'+mMaxRadiusVariance+'"/>'+
+										  '<minRadius value="'+mMinRadius+'"/>'+
+										  '<rotatePerSecond value="'+mRotatePerSecond+'"/>'+
+										  '<rotatePerSecondVariance value="'+mRotatePerSecondVariance+'"/>'+
+										  '<blendFuncSource value="'+mBlendFactorSource+'"/>'+
+										  '<blendFuncDestination value="'+mBlendFactorDestination+'"/>'+
+										  '<rotationStart value="'+mStartRotation+'"/>'+
+										  '<rotationStartVariance value="'+mStartRotationVariance+'"/>'+
+										  '<rotationEnd value="'+mEndRotation+'"/>'+
+										  '<rotationEndVariance value="'+mEndRotationVariance+'"/>'+
+										'</particleEmitterConfig>';
+				return new XML(xmlString);
+			}
+			
+			private function getParticleName():String
+			{
+				if(particelSystem==null||particelSystem.texture == circle)
+				{
+					return "circel.png";
+				}
+				return _customTextureFile.name;
+			}
+			
+			private function getStartColor():ColorArgb
+			{
+				var color:ColorArgb = new ColorArgb();
+				color.red   = mStartColorRed;
+				color.green = mStartColorGreen;
+				color.blue  = mStartColorBlue;
+				color.alpha = mStartColorAlpha;
+				return color;
+			}
+			
+			private function getEndColor():ColorArgb
+			{
+				var color:ColorArgb = new ColorArgb();
+				color.red   = mFinishColorRed;
+				color.green = mFinishColorGreen;
+				color.blue  = mFinishColorBlue;
+				color.alpha = mFinishColorAlpha;
+				return color;
+			}
+			
+			private function getStartVarColor():ColorArgb
+			{
+				var color:ColorArgb = new ColorArgb();
+				color.red   = mStartColorRedVariance;
+				color.green = mStartColorGreenVariance;
+				color.blue  = mStartColorBlueVariance;
+				color.alpha = mStartColorAlphaVariance;
+				return color;
+			}
+			
+			private function getEndVarColor():ColorArgb
+			{
+				var color:ColorArgb = new ColorArgb();
+				color.red   = mFinishColorRedVariance;
+				color.green = mFinishColorGreenVariance;
+				color.blue  = mFinishColorBlueVariance;
+				color.alpha = mFinishColorAlphaVariance;
+				return color;
+			}
+			
+			
+			private var _particleFile:File;
+			private var _customTexture:Texture;
+			private var _customTextureFile:File;
+
+			private var circleBmd:BitmapData;
+			protected function importClickHandler(event:MouseEvent):void
+			{
+				var file:File = new File();
+				file.addEventListener(Event.SELECT,onImportFileSelect);
+				file.browseForOpen("选择粒子文件",[new FileFilter("粒子文件(pex)","*.pex")]);
+			}
+			
+			protected function importTextureHandler(event:MouseEvent):void
+			{
+				var file:File = new File();
+				file.addEventListener(Event.SELECT,onImportTexture);
+				file.browseForOpen("选择材质文件",[new FileFilter("png图像文件","*.png")]);
+			}
+			
+			protected function exportClickHandler(event:MouseEvent):void
+			{
+				var file:File = new File();
+				file.addEventListener(Event.SELECT,onExportSelect);
+				file.browseForSave("导出材质文件");
+			}
+			
+			protected function onExportSelect(event:Event):void
+			{
+				var file:File = event.target as File;
+				file.removeEventListener(Event.COMPLETE,onExportSelect);
+				var fs:FileStream = new FileStream();
+				fs.open(file,FileMode.WRITE);
+				fs.writeUTFBytes(getXml().toXMLString());
+				fs.close();
+				file = new File(file.parent.nativePath+"/"+getParticleName());
+				var bytes:ByteArray;
+				var png:PNGEncoder = new PNGEncoder();
+				if(!file.exists)
+				{
+					file = file.parent.resolvePath(getParticleName());
+					if(particelSystem.texture == circle)
+					{
+						bytes=png.encode(circleBmd);
+					}else
+					{
+						fs = new FileStream();
+						fs.open(_customTextureFile,FileMode.READ);
+						bytes = new ByteArray();
+						fs.readBytes(bytes,0,fs.bytesAvailable);
+						fs.close();
+					}
+					fs = new FileStream();
+					fs.open(file,FileMode.WRITE);
+					fs.writeBytes(bytes,0,bytes.bytesAvailable);
+					fs.close();
+				}
+			}
+			
+			protected function onTextureChange(event:IndexChangeEvent):void
+			{
+				var texture:Texture;
+				if(textureCombox.selectedItem.data == "circle" || _customTexture==null)
+				{
+					texture = circle;
+				}else
+				{
+					texture = _customTexture;
+				}
+				if(texture!=particelSystem.texture)
+				{
+					particelSystem.dispose();
+					particelSystem = new PDParticleSystem(getXml(),texture);
+					particelSystem.start();
+					Turkey.stage.addChild(particelSystem);
+				}
+			}
+			
+			protected function onImportTexture(event:Event):void
+			{
+				_customTextureFile = event.target as File;
+				_customTextureFile.removeEventListener(Event.SELECT,onImportTexture);
+				var fs:FileStream = new FileStream();
+				fs.open(_customTextureFile,FileMode.READ);
+				var bytes:ByteArray = new ByteArray();
+				fs.readBytes(bytes,0,fs.bytesAvailable);
+				fs.close();
+				var load:Loader = new Loader();
+				load.contentLoaderInfo.addEventListener(Event.COMPLETE,onLoadComplete);
+				load.loadBytes(bytes);
+			}
+			
+			protected function onImportFileSelect(event:Event):void
+			{
+				_particleFile = event.target as File;
+				_particleFile.removeEventListener(Event.SELECT,onImportFileSelect);
+				var fs:FileStream = new FileStream();
+				fs.open(_particleFile,FileMode.READ);
+				var xml:XML = new XML(fs.readUTFBytes(fs.bytesAvailable));
+				fs.close();
+				setXml(xml);
+				if(_customTextureFile.exists)
+				{
+					fs = new FileStream();
+					fs.open(_customTextureFile,FileMode.READ);
+					var bytes:ByteArray = new ByteArray();
+					fs.readBytes(bytes,0,fs.bytesAvailable);
+					fs.close();
+					var load:Loader = new Loader();
+					load.contentLoaderInfo.addEventListener(Event.COMPLETE,onLoadComplete);
+					load.loadBytes(bytes);
+				}
+			}
+			
+			private function onLoadComplete(event:Event):void
+			{
+				event.target.removeEventListener(Event.COMPLETE,onLoadComplete);
+				_customTexture = Texture.fromBitmap(event.target.content as Bitmap);
+				textureCombox.selectedIndex = 1;
+				particelSystem.dispose();
+				particelSystem = new PDParticleSystem(getXml(),_customTexture);
+				particelSystem.start();
+				Turkey.stage.addChild(particelSystem);
+			}
+			
+			private function onMouseDown(event:TurkeyMouseEvent):void
+			{
+				addEventListener(Event.ENTER_FRAME,onEnterFrame);
+			}
+			
+			protected function onMouseUp(event:MouseEvent):void
+			{
+				removeEventListener(Event.ENTER_FRAME,onEnterFrame);				
+			}
+			
+			private function onEnterFrame(event:Event):void
+			{
+				particelSystem.emitterX = mEmitterX = stage.mouseX;
+				particelSystem.emitterY = mEmitterY = stage.mouseY;
+			}
+			
+			private function setXml(config:XML):void
+			{
+				_customTextureFile = _particleFile.parent.resolvePath(config.texture.attribute("name"));
+				mEmitterX = parseFloat(config.sourcePosition.attribute("x"));
+				mEmitterY = parseFloat(config.sourcePosition.attribute("y"));
+				mEmitterXVariance = parseFloat(config.sourcePositionVariance.attribute("x"));
+				mEmitterYVariance = parseFloat(config.sourcePositionVariance.attribute("y"));
+				mGravityX = parseFloat(config.gravity.attribute("x"));
+				mGravityY = parseFloat(config.gravity.attribute("y"));
+				mEmitterType = getIntValue(config.emitterType);
+				mMaxNumParticles = getIntValue(config.maxParticles);
+				mLifespan = Math.max(0.01, getFloatValue(config.particleLifeSpan));
+				mLifespanVariance = getFloatValue(config.particleLifespanVariance);
+				mStartSize = getFloatValue(config.startParticleSize);
+				mStartSizeVariance = getFloatValue(config.startParticleSizeVariance);
+				mEndSize = getFloatValue(config.finishParticleSize);
+				mEndSizeVariance = getFloatValue(config.FinishParticleSizeVariance);
+				mEmitAngle = getFloatValue(config.angle);
+				mEmitAngleVariance = getFloatValue(config.angleVariance);
+				mStartRotation = getFloatValue(config.rotationStart);
+				mStartRotationVariance = getFloatValue(config.rotationStartVariance);
+				mEndRotation = getFloatValue(config.rotationEnd);
+				mEndRotationVariance = getFloatValue(config.rotationEndVariance);
+				mSpeed = getFloatValue(config.speed);
+				mSpeedVariance = getFloatValue(config.speedVariance);
+				mRadialAcceleration = getFloatValue(config.radialAcceleration);
+				mRadialAccelerationVariance = getFloatValue(config.radialAccelVariance);
+				mTangentialAcceleration = getFloatValue(config.tangentialAcceleration);
+				mTangentialAccelerationVariance = getFloatValue(config.tangentialAccelVariance);
+				mMaxRadius = getFloatValue(config.maxRadius);
+				mMaxRadiusVariance = getFloatValue(config.maxRadiusVariance);
+				mMinRadius = getFloatValue(config.minRadius);
+				mRotatePerSecond = getFloatValue(config.rotatePerSecond);
+				mRotatePerSecondVariance = getFloatValue(config.rotatePerSecondVariance);
+				var mStartColor:ColorArgb = getColor(config.startColor);
+				var mStartColorVariance:ColorArgb = getColor(config.startColorVariance);
+				var mEndColor:ColorArgb = getColor(config.finishColor);
+				var mEndColorVariance:ColorArgb = getColor(config.finishColorVariance);
+				mStartColorRed = mStartColor.red;mStartColorGreen=mStartColor.green;mStartColorBlue=mStartColor.blue;mStartColorAlpha=mStartColor.alpha;
+				mStartColorRedVariance = mStartColorVariance.red;mStartColorGreenVariance=mStartColorVariance.green;mStartColorBlueVariance=mStartColorVariance.blue;mStartColorAlphaVariance=mStartColorVariance.alpha;
+				mFinishColorRed = mEndColor.red;mFinishColorGreen=mEndColor.green;mFinishColorBlue=mEndColor.blue;mFinishColorAlpha=mEndColor.alpha;
+				mFinishColorRedVariance = mEndColorVariance.red;mFinishColorGreenVariance=mEndColorVariance.green;mFinishColorBlueVariance=mEndColorVariance.blue;mFinishColorAlphaVariance=mEndColorVariance.alpha;
+				mBlendFactorSource = getIntValue(config.blendFuncSource);
+				mBlendFactorDestination = getIntValue(config.blendFuncDestination);
+				for each(var obj:Object in BLENDS)
+				{
+					if(obj.data == mBlendFactorSource)
+					{
+						sourceBlend.selectedItem = obj;
+					}
+					if(obj.data == mBlendFactorDestination)
+					{
+						desBlend.selectedItem = obj;
+					}
+				}
+				
+				function getIntValue(element:XMLList):int
+				{
+					return parseInt(element.attribute("value"));
+				}
+				
+				function getFloatValue(element:XMLList):Number
+				{
+					return parseFloat(element.attribute("value"));
+				}
+				
+				function getColor(element:XMLList):ColorArgb
+				{
+					var color:ColorArgb = new ColorArgb();
+					color.red   = parseFloat(element.attribute("red"));
+					color.green = parseFloat(element.attribute("green"));
+					color.blue  = parseFloat(element.attribute("blue"));
+					color.alpha = parseFloat(element.attribute("alpha"));
+					return color;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:HGroup height="600" left="1000" right="0">
+		<s:Panel id="particlesPanel" width="25%" title="粒子" height="100%">
+			<s:VGroup top="10" left="10" right="10">
+				<s:Label fontSize="13" text="发射器配置"/>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="发射器类型"/>
+					<s:ComboBox width="100%" id="emitterType" dataProvider="{EMITTER_TYPES}" selectedIndex="0" change="{mEmitterType=particelSystem.emitterType=emitterType.selectedItem.data;}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="发射器位置-Y"/>
+					<s:NumericStepper id="emitterX" minimum="-1000" maximum="1000" stepSize="1" width="100%" value="{mEmitterX}" change="{mEmitterX=particelSystem.emitterX=emitterX.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="发射器位置-X"/>
+					<s:NumericStepper id="emitterY" minimum="-1000" maximum="1000" stepSize="1" width="100%" value="{mEmitterY}" change="{mEmitterY=particelSystem.emitterY=emitterY.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="发射器角度"/>
+					<s:NumericStepper id="emitterAngle" minimum="0" maximum="360" stepSize="1" width="100%" value="{mEmitAngle}" change="{mEmitAngle=particelSystem.emitAngle=emitterAngle.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="发射器角度变化"/>
+					<s:NumericStepper id="emitterAngleVar" minimum="0" maximum="360" stepSize="1" width="100%" value="{mEmitAngleVariance}" change="{mEmitAngleVariance=particelSystem.emitAngleVariance=emitterAngleVar.value}"/>
+				</s:HGroup>
+				<mx:HRule width="100%"/>
+				<s:Label fontSize="13" text="粒子配置"/>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="粒子数量"/>
+					<s:NumericStepper id="maxParticles" minimum="0" maximum="1000" width="100%" value="{mMaxNumParticles}" change="{mMaxNumParticles=particelSystem.maxNumParticles=maxParticles.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="生命周期"/>
+					<s:NumericStepper id="lifeSpan" minimum="0" maximum="10" stepSize="0.1" width="100%" value="{mLifespan}" change="{mLifespan=particelSystem.lifespan=lifeSpan.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="生命变化"/>
+					<s:NumericStepper id="lifeSpanVar" minimum="0" maximum="10" stepSize="0.1" width="100%" value="{mLifespanVariance}" change="{mLifespanVariance=particelSystem.lifespanVariance=lifeSpanVar.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="出生大小"/>
+					<s:NumericStepper id="startSize" minimum="0" maximum="70" stepSize="0.1" width="100%" value="{mStartSize}" change="{mStartSize=particelSystem.startSize=startSize.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="出生大小变化"/>
+					<s:NumericStepper id="startSizeVar" minimum="0" maximum="70" stepSize="0.1" width="100%" value="{mStartSizeVariance}" change="{mStartSizeVariance=particelSystem.startSizeVariance=startSizeVar.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="消逝大小"/>
+					<s:NumericStepper id="endSize" minimum="0" maximum="70" stepSize="0.1" width="100%" value="{mEndSize}" change="{mEndSize=particelSystem.endSize=endSize.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="消逝大小变化"/>
+					<s:NumericStepper id="endSizeVar" minimum="0" maximum="70" stepSize="0.1" width="100%" value="{mEndSizeVariance}" change="{mEndSizeVariance=particelSystem.endSizeVariance=endSizeVar.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="出生角度"/>
+					<s:NumericStepper id="startRot" minimum="0" maximum="360" stepSize="1" width="100%" value="{mStartRotation}" change="{mStartRotation=startRot.value;particelSystem.startRotation=deg2rad(mStartRotation)}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="出生角度变化"/>
+					<s:NumericStepper id="startRotVar" minimum="0" maximum="360" stepSize="1" width="100%" value="{mStartRotationVariance}" change="{mStartRotationVariance=startRotVar.value;particelSystem.startRotationVariance=deg2rad(mStartRotationVariance)}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="消逝角度"/>
+					<s:NumericStepper id="endRot" minimum="0" maximum="360" stepSize="1" width="100%" value="{mEndRotation}" change="{mEndRotation=endRot.value;particelSystem.endRotation=deg2rad(mEndRotation)}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="消逝角度变化"/>
+					<s:NumericStepper id="endRotVar" minimum="0" maximum="360" stepSize="1" width="100%" value="{mEndRotationVariance}" change="{mEndSizeVariance=endSizeVar.value;particelSystem.endSizeVariance=deg2rad(mEndSizeVariance)}"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:Panel>
+		<s:Panel id="particleBehaviorPanel" width="25%" title="粒子行为" height="100%">
+			<s:VGroup top="10" left="10" right="10">
+				<s:Label fontSize="13" text="重力发射器"/>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="X-变化"/>
+					<s:NumericStepper id="xVar" minimum="0" maximum="1000" stepSize="1" width="100%" value="{mEmitterXVariance}" change="{mEmitterXVariance=particelSystem.emitterXVariance=xVar.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="Y-变化"/>
+					<s:NumericStepper id="yVar" minimum="0" maximum="1000" stepSize="1" width="100%" value="{mEmitterYVariance}" change="{mEmitterYVariance=particelSystem.emitterYVariance=yVar.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="速度"/>
+					<s:NumericStepper id="speed" minimum="0" maximum="500" stepSize="1" width="100%" value="{mSpeed}" change="{mSpeed=particelSystem.speed=speed.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="速度变化"/>
+					<s:NumericStepper id="speedVar" minimum="0" maximum="500" stepSize="1" width="100%" value="{mSpeedVariance}" change="{mSpeedVariance=particelSystem.speedVariance=speedVar.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="X-重力因素"/>
+					<s:NumericStepper id="gravityX" minimum="-500" maximum="500" stepSize="1" width="100%" value="{mGravityX}" change="{mGravityX=particelSystem.gravityX=gravityX.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="Y-重力因素"/>
+					<s:NumericStepper id="gravityY" minimum="-500" maximum="500" stepSize="1" width="100%" value="{mGravityY}" change="{mGravityY=particelSystem.gravityY=gravityY.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="切线加速度"/>
+					<s:NumericStepper id="tanAcc" minimum="-500" maximum="500" stepSize="1" width="100%" value="{mTangentialAcceleration}" change="{mTangentialAcceleration=particelSystem.tangentialAcceleration=tanAcc.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="切线加速度变化"/>
+					<s:NumericStepper id="tanAccVar" minimum="0" maximum="500" stepSize="1" width="100%" value="{mTangentialAccelerationVariance}" change="{mTangentialAccelerationVariance=particelSystem.tangentialAccelerationVariance=tanAccVar.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="射线加速度"/>
+					<s:NumericStepper id="radAcc" minimum="-400" maximum="400" stepSize="1" width="100%" value="{mRadialAcceleration}" change="{mRadialAcceleration=particelSystem.radialAcceleration=radAcc.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="射线加速度变化"/>
+					<s:NumericStepper id="radAccVar" minimum="0" maximum="500" stepSize="1" width="100%" value="{mRadialAccelerationVariance}" change="{mRadialAccelerationVariance=particelSystem.radialAccelerationVariance=radAccVar.value}"/>
+				</s:HGroup>
+				<mx:HRule width="100%"/>
+				<s:Label fontSize="13" text="射线发射器"/>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="最大角度"/>
+					<s:NumericStepper id="maxRadius" minimum="0" maximum="500" width="100%" value="{mMaxRadius}" change="{mMaxRadius=particelSystem.maxRadius=maxRadius.value;}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="最大角度变化"/>
+					<s:NumericStepper id="maxRadiusVar" minimum="0" maximum="500" width="100%" value="{mMaxRadiusVariance}" change="{mMaxRadiusVariance=particelSystem.maxRadiusVariance=maxRadiusVar.value;}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="最小角度"/>
+					<s:NumericStepper id="minRadius" minimum="0" maximum="500" width="100%" value="{mMinRadius}" change="{mMinRadius=particelSystem.minRadius=minRadius.value}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="角速度"/>
+					<s:NumericStepper id="degSec" minimum="-360" maximum="360" width="100%" value="{mRotatePerSecond}" change="{mRotatePerSecond=degSec.value;particelSystem.rotatePerSecond=deg2rad(mRotatePerSecond)}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="角速度变化"/>
+					<s:NumericStepper id="degSecVar" minimum="0" maximum="360" width="100%" value="{mRotatePerSecondVariance}" change="{mRotatePerSecondVariance=degSecVar.value;particelSystem.rotatePerSecondVariance=deg2rad(mRotatePerSecondVariance)}"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:Panel>
+		<s:Panel id="particleColorPanel" width="25%" title="粒子颜色" height="100%">
+			<s:VGroup top="10" left="10" right="10">
+				<s:Label fontSize="13" text="出生颜色"/>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="R"/>
+					<s:NumericStepper id="startRed" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mStartColorRed}" change="{mStartColorRed=startRed.value;particelSystem.startColor = getStartColor()}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="G"/>
+					<s:NumericStepper id="startGreen" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mStartColorGreen}" change="{mStartColorGreen=startGreen.value;particelSystem.startColor = getStartColor()}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="B"/>
+					<s:NumericStepper id="startBlue" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mStartColorBlue}" change="{mStartColorBlue=startBlue.value;particelSystem.startColor = getStartColor()}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="A"/>
+					<s:NumericStepper id="startAlpha" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mStartColorAlpha}" change="{mStartColorAlpha=startAlpha.value;particelSystem.startColor = getStartColor()}"/>
+				</s:HGroup>
+				<s:Label fontSize="13" text="消逝颜色"/>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="R"/>
+					<s:NumericStepper id="endRed" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mFinishColorRed}" change="{mFinishColorRed=endRed.value;particelSystem.endColor= getEndColor()}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="G"/>
+					<s:NumericStepper id="endGreen" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mFinishColorGreen}" change="{mFinishColorGreen=endGreen.value;particelSystem.endColor= getEndColor()}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="B"/>
+					<s:NumericStepper id="endBlue" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mFinishColorBlue}" change="{mFinishColorBlue=endBlue.value;particelSystem.endColor= getEndColor()}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="A"/>
+					<s:NumericStepper id="endAlpha" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mFinishColorAlpha}" change="{mFinishColorAlpha=endAlpha.value;particelSystem.endColor= getEndColor()}"/>
+				</s:HGroup>
+				<mx:HRule width="100%"/>
+				<s:Label fontSize="13" text="出生颜色变化"/>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="R"/>
+					<s:NumericStepper id="startRedVar" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mStartColorRedVariance}" change="{mStartColorRedVariance=startRedVar.value;particelSystem.startColorVariance = getStartVarColor()}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="G"/>
+					<s:NumericStepper id="startGreenVar" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mStartColorGreenVariance}" change="{mStartColorGreenVariance=startGreenVar.value;particelSystem.startColorVariance = getStartVarColor()}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="B"/>
+					<s:NumericStepper id="startBlueVar" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mStartColorBlueVariance}" change="{mStartColorBlueVariance=startBlueVar.value;particelSystem.startColorVariance = getStartVarColor()}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="A"/>
+					<s:NumericStepper id="startAlphaVar" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mStartColorAlphaVariance}" change="{mStartColorAlphaVariance=startAlphaVar.value;particelSystem.startColorVariance = getStartVarColor()}"/>
+				</s:HGroup>
+				<s:Label fontSize="13" text="消逝颜色变化"/>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="R"/>
+					<s:NumericStepper id="endRedVar" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mFinishColorRedVariance}" change="{mFinishColorRedVariance=endRedVar.value;particelSystem.endColor= getEndVarColor()}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="G"/>
+					<s:NumericStepper id="endGreenVar" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mFinishColorGreenVariance}" change="{mFinishColorGreenVariance=endGreenVar.value;particelSystem.endColor= getEndVarColor()}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="B"/>
+					<s:NumericStepper id="endBlueVar" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mFinishColorBlueVariance}" change="{mFinishColorBlueVariance=endBlueVar.value;particelSystem.endColor= getEndVarColor()}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="A"/>
+					<s:NumericStepper id="endAlphaVar" minimum="0" maximum="1" stepSize="0.1" width="100%" value="{mFinishColorAlphaVariance}" change="{mFinishColorAlphaVariance=endAlphaVar.value;particelSystem.endColor= getEndVarColor()}"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:Panel>
+		<s:Panel id="particleColorBehaviorPanel" width="25%" title="叠加模式" height="100%">
+			<s:VGroup top="10" left="10" right="10">
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="源"/>
+					<s:ComboBox width="100%" id="sourceBlend" dataProvider="{BLENDS}" selectedIndex="4" change="{mBlendFactorSource=sourceBlend.selectedItem.data;particelSystem.blendFactorSource=sourceBlend.selectedItem.label}"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" width="100%">
+					<s:Label text="目标"/>
+					<s:ComboBox width="100%" id="desBlend" dataProvider="{BLENDS}" selectedIndex="1" change="{mBlendFactorDestination=desBlend.selectedItem.data;particelSystem.blendFactorSource=desBlend.selectedItem.label}"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:Panel>
+	</s:HGroup>
+	<s:Panel id="generalPanel" width="1000" right="0" left="1000" bottom="0" top="600" title="常规">
+		<s:HGroup width="100%" height="100%">
+			<mx:LinkButton width="25%" height="100%" label="导入粒子文件" click="importClickHandler(event)"/><mx:VRule height="100%"/>
+			<mx:LinkButton width="25%" height="100%" label="导出粒子文件" click="exportClickHandler(event)"/><mx:VRule height="100%"/>
+			<mx:LinkButton width="25%" height="100%" label="导入材质" click="importTextureHandler(event)"/><mx:VRule height="100%"/>
+			<s:VGroup width="25%" height="100%" verticalAlign="middle">
+				<s:Label text="选择材质"/>
+				<s:ComboBox id="textureCombox" dataProvider="{TEXTURES}" change="onTextureChange(event)" selectedIndex="0"/>
+			</s:VGroup>
+		</s:HGroup>
+	</s:Panel>
+</s:WindowedApplication>

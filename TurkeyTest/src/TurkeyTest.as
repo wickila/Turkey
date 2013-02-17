@@ -54,7 +54,6 @@ package
 			mc.pivotX = 74;
 			mc.pivotY = 362;
 			mc.x = mc.y = 200;
-			mc.pixelHit = true;
 //			Turkey.stage.addChild(mc);
 			var light:Light = new Light();
 			light.color = 0xffffffff;
@@ -70,7 +69,6 @@ package
 				mc.stop();
 				mc.x = Math.random()*stage.stageWidth-300;
 				mc.y = Math.random()*stage.stageHeight-300;
-				mc.pixelHit = true;
 				Turkey.stage.addChild(mc);
 			}
 			
