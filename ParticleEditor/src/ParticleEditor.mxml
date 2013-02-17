@@ -508,20 +508,20 @@
 					<s:ComboBox width="100%" id="emitterType" dataProvider="{EMITTER_TYPES}" selectedIndex="0" change="{mEmitterType=particelSystem.emitterType=emitterType.selectedItem.data;}"/>
 				</s:HGroup>
 				<s:HGroup verticalAlign="middle" width="100%">
-					<s:Label text="发射器位置-Y"/>
+					<s:Label text="发射器位置-X"/>
 					<s:NumericStepper id="emitterX" minimum="-1000" maximum="1000" stepSize="1" width="100%" value="{mEmitterX}" change="{mEmitterX=particelSystem.emitterX=emitterX.value}"/>
 				</s:HGroup>
 				<s:HGroup verticalAlign="middle" width="100%">
-					<s:Label text="发射器位置-X"/>
+					<s:Label text="发射器位置-Y"/>
 					<s:NumericStepper id="emitterY" minimum="-1000" maximum="1000" stepSize="1" width="100%" value="{mEmitterY}" change="{mEmitterY=particelSystem.emitterY=emitterY.value}"/>
 				</s:HGroup>
 				<s:HGroup verticalAlign="middle" width="100%">
 					<s:Label text="发射器角度"/>
-					<s:NumericStepper id="emitterAngle" minimum="0" maximum="360" stepSize="1" width="100%" value="{mEmitAngle}" change="{mEmitAngle=particelSystem.emitAngle=emitterAngle.value}"/>
+					<s:NumericStepper id="emitterAngle" minimum="0" maximum="360" stepSize="1" width="100%" value="{mEmitAngle}" change="{mEmitAngle=emitterAngle.value;particelSystem.emitAngle=deg2rad(mEmitAngle)}"/>
 				</s:HGroup>
 				<s:HGroup verticalAlign="middle" width="100%">
 					<s:Label text="发射器角度变化"/>
-					<s:NumericStepper id="emitterAngleVar" minimum="0" maximum="360" stepSize="1" width="100%" value="{mEmitAngleVariance}" change="{mEmitAngleVariance=particelSystem.emitAngleVariance=emitterAngleVar.value}"/>
+					<s:NumericStepper id="emitterAngleVar" minimum="0" maximum="360" stepSize="1" width="100%" value="{mEmitAngleVariance}" change="{mEmitAngleVariance=emitterAngleVar.value;particelSystem.emitAngleVariance=deg2rad(mEmitAngleVariance)}"/>
 				</s:HGroup>
 				<mx:HRule width="100%"/>
 				<s:Label fontSize="13" text="粒子配置"/>
@@ -584,7 +584,7 @@
 				</s:HGroup>
 				<s:HGroup verticalAlign="middle" width="100%">
 					<s:Label text="速度"/>
-					<s:NumericStepper id="speed" minimum="0" maximum="500" stepSize="1" width="100%" value="{mSpeed}" change="{mSpeed=particelSystem.speed=speed.value}"/>
+					<s:NumericStepper id="speed" minimum="0" maximum="1000" stepSize="1" width="100%" value="{mSpeed}" change="{mSpeed=particelSystem.speed=speed.value}"/>
 				</s:HGroup>
 				<s:HGroup verticalAlign="middle" width="100%">
 					<s:Label text="速度变化"/>
