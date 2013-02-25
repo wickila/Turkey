@@ -63,7 +63,6 @@ package
 //			img2.scaleX = img2.scaleY = .5;
 //			img2.pivotX = 80;
 //			img2.pivotY = img2.height/2;
-			img.buttonMode = true;
 //			img.filters = [glowFilter];
 //			img.alpha = .5;
 //			img2.visible = false;
