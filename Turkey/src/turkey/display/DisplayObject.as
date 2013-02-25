@@ -48,7 +48,6 @@ package turkey.display
 		private var _stageMousePoint:Point = new Point();
 		
 		protected var _mouseEnabled:Boolean=true;
-		protected var _buttonMode:Boolean = false;
 		protected var _colorMatrix:Matrix3D;
 		protected var _alpha:Number=1;
 		protected var _visible:Boolean = true;
@@ -242,17 +241,6 @@ package turkey.display
 		public function set blendMode(value:String):void
 		{
 			_blendMode = value;
-		}
-		
-		public function get buttonMode():Boolean
-		{
-			return _buttonMode;
-		}
-		
-		public function set buttonMode(value:Boolean):void
-		{
-			if(_buttonMode == value)return;
-			_buttonMode = value;
 		}
 		
 		internal function get mouseOut():Boolean
@@ -570,7 +558,6 @@ package turkey.display
 			{
 				mouseOut = true;
 			}
-			Stage.BUTTON_MODE = (Stage.BUTTON_MODE||(_mouseEnabled && _buttonMode && !_mouseOut));
 		}
 		/**
 		 *	加入到渲染队列当中，如果有滤镜，则添加进渲染队列，并且渲染(因为如果有子对象，可以一次画完以后，再一次运用滤镜，而不必对每个子对象都分别运用滤镜，可以提高效率)

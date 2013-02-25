@@ -8,12 +8,16 @@
 			import flash.utils.ByteArray;
 			
 			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.UIComponent;
+			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.graphics.codec.PNGEncoder;
 			
 			import spark.events.IndexChangeEvent;
 			
 			import turkey.core.Turkey;
+			import turkey.display.Image;
 			import turkey.events.TurkeyEvent;
 			import turkey.events.TurkeyMouseEvent;
 			import turkey.particle.ColorArgb;
@@ -152,6 +156,9 @@
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
 				this.nativeWindow.maximize();
+				var con:UIComponent = new UIComponent();
+				con.addChild(new DebugStats());
+				addElement(con);
 				nativeWindow.addEventListener(NativeWindowBoundsEvent.RESIZE,onMaximize);
 			}
 			
@@ -307,31 +314,48 @@
 			{
 				var file:File = event.target as File;
 				file.removeEventListener(Event.COMPLETE,onExportSelect);
-				var fs:FileStream = new FileStream();
-				fs.open(file,FileMode.WRITE);
-				fs.writeUTFBytes(getXml().toXMLString());
-				fs.close();
-				file = new File(file.parent.nativePath+"/"+getParticleName());
-				var bytes:ByteArray;
-				var png:PNGEncoder = new PNGEncoder();
-				if(!file.exists)
+				if(file.extension!="pex")
 				{
-					file = file.parent.resolvePath(getParticleName());
-					if(particelSystem.texture == circle)
+					Alert.show("您选择的文件看起来不像是粒子文件，确定要导出成此文件？","警告",Alert.YES|Alert.NO,null,onOkFunction);
+				}else
+				{
+					save();
+				}
+				function onOkFunction(event:CloseEvent):void
+				{
+					if(event.detail==Alert.YES)
 					{
-						bytes=png.encode(circleBmd);
-					}else
+						save();
+					}
+				}
+				function save():void
+				{
+					var fs:FileStream = new FileStream();
+					fs.open(file,FileMode.WRITE);
+					fs.writeUTFBytes(getXml().toXMLString());
+					fs.close();
+					file = new File(file.parent.nativePath+"/"+getParticleName());
+					var bytes:ByteArray;
+					var png:PNGEncoder = new PNGEncoder();
+					if(!file.exists)
 					{
+						file = file.parent.resolvePath(getParticleName());
+						if(particelSystem.texture == circle)
+						{
+							bytes=png.encode(circleBmd);
+						}else
+						{
+							fs = new FileStream();
+							fs.open(_customTextureFile,FileMode.READ);
+							bytes = new ByteArray();
+							fs.readBytes(bytes,0,fs.bytesAvailable);
+							fs.close();
+						}
 						fs = new FileStream();
-						fs.open(_customTextureFile,FileMode.READ);
-						bytes = new ByteArray();
-						fs.readBytes(bytes,0,fs.bytesAvailable);
+						fs.open(file,FileMode.WRITE);
+						fs.writeBytes(bytes,0,bytes.bytesAvailable);
 						fs.close();
 					}
-					fs = new FileStream();
-					fs.open(file,FileMode.WRITE);
-					fs.writeBytes(bytes,0,bytes.bytesAvailable);
-					fs.close();
 				}
 			}
 			
@@ -365,6 +389,7 @@
 				fs.close();
 				var load:Loader = new Loader();
 				load.contentLoaderInfo.addEventListener(Event.COMPLETE,onLoadComplete);
+				load.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR,onIoErr);
 				load.loadBytes(bytes);
 			}
 			
@@ -387,6 +412,9 @@
 					var load:Loader = new Loader();
 					load.contentLoaderInfo.addEventListener(Event.COMPLETE,onLoadComplete);
 					load.loadBytes(bytes);
+				}else
+				{
+					Alert.show("加载材质文件出错，请检查粒子文件的文件夹下是否包含材质文件","错误");
 				}
 			}
 			
@@ -494,6 +522,40 @@
 				}
 			}
 			
+			protected function onIoErr(event:IOErrorEvent):void
+			{
+				Alert.show("加载材质文件出错，请检查粒子文件的文件夹下是否包含材质文件","错误");
+			}
+			
+			protected function onBgBtnClickHandler(event:MouseEvent):void
+			{
+				var file:File = new File();
+				file.addEventListener(Event.SELECT,onBgSelect);
+				file.browseForOpen("请选择背景文件",[new FileFilter("png,jpg图像文件","*.png;*.jpg")]);
+			}
+			
+			protected function onBgSelect(event:Event):void
+			{
+				var file:File = event.target as File;
+				var fs:FileStream = new FileStream();
+				fs.open(file,FileMode.READ);
+				var bytes:ByteArray = new ByteArray();
+				fs.readBytes(bytes,0,fs.bytesAvailable);
+				fs.close();
+				var load:Loader = new Loader();
+				load.contentLoaderInfo.addEventListener(Event.COMPLETE,onBgLoadComplete);
+				load.loadBytes(bytes);
+			}
+			
+			private var _bg:Image;
+			protected function onBgLoadComplete(event:Event):void
+			{
+				var bitmap:Bitmap = LoaderInfo(event.target).content as Bitmap;
+				if(_bg!=null)_bg.dispose();
+				_bg = new Image(Texture.fromBitmap(bitmap));
+				Turkey.stage.addChildAt(_bg,0);
+			}
+			
 		]]>
 	</fx:Script>
 	<fx:Declarations>
@@ -576,7 +638,7 @@
 				<s:Label fontSize="13" text="重力发射器"/>
 				<s:HGroup verticalAlign="middle" width="100%">
 					<s:Label text="X-变化"/>
-					<s:NumericStepper id="xVar" minimum="0" maximum="1000" stepSize="1" width="100%" value="{mEmitterXVariance}" change="{mEmitterXVariance=particelSystem.emitterXVariance=xVar.value}"/>
+					<s:NumericStepper id="xVar" minimum="0" maximum="4000" stepSize="1" width="100%" value="{mEmitterXVariance}" change="{mEmitterXVariance=particelSystem.emitterXVariance=xVar.value}"/>
 				</s:HGroup>
 				<s:HGroup verticalAlign="middle" width="100%">
 					<s:Label text="Y-变化"/>
@@ -719,7 +781,7 @@
 				</s:HGroup>
 				<s:HGroup verticalAlign="middle" width="100%">
 					<s:Label text="目标"/>
-					<s:ComboBox width="100%" id="desBlend" dataProvider="{BLENDS}" selectedIndex="1" change="{mBlendFactorDestination=desBlend.selectedItem.data;particelSystem.blendFactorSource=desBlend.selectedItem.label}"/>
+					<s:ComboBox width="100%" id="desBlend" dataProvider="{BLENDS}" selectedIndex="1" change="{mBlendFactorDestination=desBlend.selectedItem.data;particelSystem.blendFactorDestination=desBlend.selectedItem.label}"/>
 				</s:HGroup>
 			</s:VGroup>
 		</s:Panel>
@@ -730,8 +792,12 @@
 			<mx:LinkButton width="25%" height="100%" label="导出粒子文件" click="exportClickHandler(event)"/><mx:VRule height="100%"/>
 			<mx:LinkButton width="25%" height="100%" label="导入材质" click="importTextureHandler(event)"/><mx:VRule height="100%"/>
 			<s:VGroup width="25%" height="100%" verticalAlign="middle">
-				<s:Label text="选择材质"/>
-				<s:ComboBox id="textureCombox" dataProvider="{TEXTURES}" change="onTextureChange(event)" selectedIndex="0"/>
+				<s:VGroup width="100%" height="50%" verticalAlign="middle">
+					<s:Label text="选择材质"/>
+					<s:ComboBox id="textureCombox" dataProvider="{TEXTURES}" change="onTextureChange(event)" selectedIndex="0"/>
+				</s:VGroup>
+				<mx:HRule width="100%"/>
+				<mx:LinkButton width="100%" height="50%" label="更改背景" click="onBgBtnClickHandler(event)"/>
 			</s:VGroup>
 		</s:HGroup>
 	</s:Panel>

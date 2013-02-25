@@ -11,7 +11,6 @@ package turkey.display
     import flash.geom.Matrix3D;
     import flash.geom.Point;
     import flash.system.Capabilities;
-    import flash.ui.Mouse;
     import flash.ui.MouseCursor;
     
     import turkey.TurkeyRenderer;
@@ -25,14 +24,14 @@ package turkey.display
 	[Event(name="complete", type="turkey.events.TurkeyEvent")]
     public class Stage extends DisplayObjectContainer
     {
+		public static var RIGHT_MOUSE_ENABLE:Boolean = false;
+		
 		public var stage2D:flash.display.Stage;
 		public var stage3D:Stage3D;
 		public var context3D:Context3D;
         public var stageWidth:int;
         public var stageHeight:int;
 		public var flashMatrix:Matrix3D;
-		public var buttomMouse:String = MouseCursor.BUTTON;
-		public var autoMouse:String = MouseCursor.AUTO;
 		private var _time:uint;
 		private var _frameRate:int;
 		private var _mouseMoveEnable:Boolean = false;
@@ -42,8 +41,6 @@ package turkey.display
 		private static var _bColorB:uint;
 		private var sceneTexture:Texture;
 		
-		public static var BUTTON_MODE:Boolean = false;
-        
         public function Stage(stage:flash.display.Stage,stageWidth:Number=0,stageHeight:Number=0, color:uint=0)
         {
 			stage2D = stage;
@@ -68,24 +65,26 @@ package turkey.display
 			stage3D = stage.stage3Ds[0];
 			stage3D.addEventListener(flash.events.Event.CONTEXT3D_CREATE,onContext3DCrete);
 			stage2D.addEventListener(MouseEvent.CLICK,onStageClick);
-			stage2D.addEventListener(MouseEvent.RIGHT_CLICK,onStageClick);
 			stage2D.addEventListener(MouseEvent.MOUSE_DOWN,onStageClick);
 			stage2D.addEventListener(MouseEvent.MOUSE_UP,onStageClick);
-			stage2D.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN,onStageClick);
-			stage2D.addEventListener(MouseEvent.RIGHT_MOUSE_UP,onStageClick);
+			if(RIGHT_MOUSE_ENABLE)
+			{
+				stage2D.addEventListener(MouseEvent.RIGHT_CLICK,onStageClick);
+				stage2D.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN,onStageClick);
+				stage2D.addEventListener(MouseEvent.RIGHT_MOUSE_UP,onStageClick);
+			}
+
 			stage3D.requestContext3D();
         }
 		
 		protected function onEnterFrame(event:Event):void
 		{
-			BUTTON_MODE = false;
 			context3D.clear(_bColorR,_bColorG,_bColorB,_bColorA);
 			addToRenderList(_transformationMatrix,_colorMatrix,1,false);
 			TurkeyRenderer.render();
 			context3D.present();
 			
 			hitMouse(stage2D.mouseX,stage2D.mouseY);
-			Mouse.cursor = BUTTON_MODE?buttomMouse:autoMouse;
 		}
 		/**
 		 * 
