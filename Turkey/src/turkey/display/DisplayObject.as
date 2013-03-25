@@ -254,6 +254,7 @@ package turkey.display
 			_mouseOut = value;
 			if(_mouseEnabled)
 			{
+				_stageMousePoint.setTo(Turkey.stage.stage2D.mouseX,Turkey.stage.stage2D.mouseY);
 				if(_mouseOut)
 				{
 					dispatchEvent(new TurkeyMouseEvent(TurkeyMouseEvent.MOUSE_OUT,this,mouseX,mouseY,_stageMousePoint.x,_stageMousePoint.y));
@@ -317,11 +318,15 @@ package turkey.display
 		
 		public function get mouseX():Number
 		{
+			_stageMousePoint.setTo(Turkey.stage.stage2D.mouseX,Turkey.stage.stage2D.mouseY);
+			globalToLocal(_stageMousePoint);_localMousePoint.setTo(_helpPoint.x,_helpPoint.y);
 			return _localMousePoint.x;
 		}
 		
 		public function get mouseY():Number
 		{
+			_stageMousePoint.setTo(Turkey.stage.stage2D.mouseX,Turkey.stage.stage2D.mouseY);
+			globalToLocal(_stageMousePoint);_localMousePoint.setTo(_helpPoint.x,_helpPoint.y);
 			return _localMousePoint.y;
 		}
 		/**
@@ -540,24 +545,6 @@ package turkey.display
 		public function get hasVisibleArea():Boolean
 		{
 			return _visible && _alpha != 0.0 && _scaleX != 0.0 && _scaleY != 0.0;
-		}
-		/**
-		 * 与鼠标碰撞，方便响应MouseOver与MouseOut事件
-		 * @param stageX 全局坐标点x
-		 * @param stageY 全局坐标点y
-		 * 
-		 */		
-		public function hitMouse(stageX:Number,stageY:Number):void
-		{
-			_stageMousePoint.setTo(stageX,stageY);
-			globalToLocal(_stageMousePoint);_localMousePoint.setTo(_helpPoint.x,_helpPoint.y);
-			if(_mouseEnabled)
-			{
-				mouseOut = !hitTest(_localMousePoint,true);
-			}else
-			{
-				mouseOut = true;
-			}
 		}
 		/**
 		 *	加入到渲染队列当中，如果有滤镜，则添加进渲染队列，并且渲染(因为如果有子对象，可以一次画完以后，再一次运用滤镜，而不必对每个子对象都分别运用滤镜，可以提高效率)

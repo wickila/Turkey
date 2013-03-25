@@ -1,6 +1,5 @@
 package turkey.display
 {
-	import flash.display.BitmapData;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	

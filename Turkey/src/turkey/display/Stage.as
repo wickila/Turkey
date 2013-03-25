@@ -11,7 +11,6 @@ package turkey.display
     import flash.geom.Matrix3D;
     import flash.geom.Point;
     import flash.system.Capabilities;
-    import flash.ui.MouseCursor;
     
     import turkey.TurkeyRenderer;
     import turkey.core.turkey_internal;
@@ -24,7 +23,7 @@ package turkey.display
 	[Event(name="complete", type="turkey.events.TurkeyEvent")]
     public class Stage extends DisplayObjectContainer
     {
-		public static var RIGHT_MOUSE_ENABLE:Boolean = false;
+		public static var RIGHT_MOUSE_ENABLE:Boolean = true;
 		
 		public var stage2D:flash.display.Stage;
 		public var stage3D:Stage3D;
@@ -40,6 +39,8 @@ package turkey.display
 		private static var _bColorG:uint;
 		private static var _bColorB:uint;
 		private var sceneTexture:Texture;
+		private var _currentMouseTarget:DisplayObject;
+		private static var p:Point=new Point();
 		
         public function Stage(stage:flash.display.Stage,stageWidth:Number=0,stageHeight:Number=0, color:uint=0)
         {
@@ -83,8 +84,20 @@ package turkey.display
 			addToRenderList(_transformationMatrix,_colorMatrix,1,false);
 			TurkeyRenderer.render();
 			context3D.present();
-			
-			hitMouse(stage2D.mouseX,stage2D.mouseY);
+			p.setTo(stage2D.mouseX,stage2D.mouseY);
+			var target:DisplayObject = hitTest(p,true);
+			if(_currentMouseTarget!=target)
+			{
+				if(_currentMouseTarget!=null)
+				{
+					_currentMouseTarget.mouseOut = true;
+				}
+				_currentMouseTarget = target;
+				if(_currentMouseTarget!=null)
+				{
+					_currentMouseTarget.mouseOut = false;
+				}
+			}
 		}
 		/**
 		 * 

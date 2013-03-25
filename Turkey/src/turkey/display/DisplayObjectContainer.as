@@ -254,15 +254,6 @@ package turkey.display
 			return null;
 		}
 		
-		override public function hitMouse(stageX:Number,stageY:Number):void
-		{
-			super.hitMouse(stageX,stageY);
-			for(var i:int=0;i<_hitMouseList.length;i++)
-			{
-				_hitMouseList[i].hitMouse(stageX,stageY);
-			}
-		}
-		
 		override public function addToRenderList(parentMatrix:Matrix, parentColorMatrix:Matrix3D, parentAlpha:Number,parentFilter:Boolean):void
 		{
 			if(!hasVisibleArea)return;
